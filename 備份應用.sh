@@ -306,6 +306,7 @@ else
 	echoRgb "本次備份: $(($((filesizee - filesize)) * 1000 / 1024))kb"
 fi
 echoRgb "批量備份完成"
+starttime1="$TIME"
 endtime 1 "批量備份開始到結束"
 exit 0
 }&

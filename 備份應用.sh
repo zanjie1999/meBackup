@@ -121,11 +121,10 @@ Backup_apk() {
 			echoRgb "${path##*/} ${m_size}MB(${k_size}KB)" "2" ; echo "${path##*/}">>"$apklist"
 		done
 		if [[ -f $apklist ]]; then
-			apk_path="$(echo "$apk_path" | head -1)" ; apk_path="${apk_path%/*}"
 			case $Compression_method in
-			tar|TAR|Tar) tar -C "$apk_path" -cf "$Backup_folder/apk.tar" -T "$apklist" ;;
-			lz4|LZ4|Lz4) tar -C "$apk_path" -cf - -T "$apklist" | lz4 -1 >"$Backup_folder/apk.tar.lz4" ;;
-			zstd|Zstd|ZSTD) tar -C "$apk_path" -cf - -T "$apklist" | zstd -r -T0 -6 -q >"$Backup_folder/apk.tar.zst" ;;
+			tar|TAR|Tar) tar -C "$apk_path2" -cf "$Backup_folder/apk.tar" -T "$apklist" ;;
+			lz4|LZ4|Lz4) tar -C "$apk_path2" -cf - -T "$apklist" | lz4 -1 >"$Backup_folder/apk.tar.lz4" ;;
+			zstd|Zstd|ZSTD) tar -C "$apk_path2" -cf - -T "$apklist" | zstd -r -T0 -6 -q >"$Backup_folder/apk.tar.zst" ;;
 			esac
 		else
 			(echoRgb "apklist不存在" "0" ; Set_back)
@@ -233,14 +232,12 @@ while [[ $i -le $r ]]; do
 	app_details="$Backup_folder/app_details"
 	[[ -f $app_details ]] && . "$app_details"
 	[[ $name = "" ]] && echoRgb "警告! 應用列表.txt應用包名獲取失敗，可能修改有問題" "0" && exit 1
-	Get_apklist="$(pm list packages | cut -f2 -d ':' | grep -w "^${name}$")"
-	if [[ $Get_apklist != "" && $Get_apklist = $name ]]; then
+	apk_path="$(pm path "$name" | cut -f2 -d ':')"
+	apk_path2="$(echo "$apk_path" | head -1)" ; apk_path2="${apk_path2%/*}"
+	if [[ -d $apk_path2 ]]; then
 		starttime2="$(date -u "+%s")"
 		echoRgb "備份$name2 ($name)"
-		apk_path="$(pm path "$name" | cut -f2 -d ':')"
-		if [[ $recovery_backup = true ]]; then
-			apk_path2="$(pm path "$name" | cut -f2 -d ':' | head -1)" ; echo "$name2 $name ${apk_path2%/*}" >>"$script_path/應用列表.txt"
-		fi
+		[[ $recovery_backup = true ]] && echo "$name2 $name $apk_path2" >>"$script_path/應用列表.txt"
 		[[ $name = com.tencent.mobileqq ]] && echo "QQ可能恢復備份失敗或是丟失聊天記錄，請自行用你信賴的應用備份"
 		[[ $name = com.tencent.mm ]] && echo "WX可能恢復備份失敗或是丟失聊天記錄，請自行用你信賴的應用備份"
 		apk_number="$(echo "$apk_path" | wc -l)"

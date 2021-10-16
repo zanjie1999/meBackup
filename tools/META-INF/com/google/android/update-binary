@@ -99,7 +99,6 @@ Backup_apk() {
 		ui_print "${path##*/} ${m_size}MB(${k_size}KB)" ; echo "${path##*/}">>"$apklist"
 	done
 	if [[ $? = 0 && -f $apklist ]]; then
-		apk_path="$(echo "$apk_path" | head -1)"
 		case $Compression_method in
 			tar|TAR|Tar) tar -C "$apk_path" -cf "$Backup_folder/apk.tar" -T "$apklist" ;;
 			zstd|Zstd|ZSTD) tar -C "$apk_path" -cf - -T "$apklist" | zstd -r -T0 -6 -q >"$Backup_folder/apk.tar.zst" ;;

@@ -93,7 +93,7 @@ while [[ $i -le $r ]]; do
 	echoRgb "恢複第$i個應用 總共$r個 剩下$((r-i))個應用"
 	name="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n "${i}p" | awk '{print $2}')"
 	name2="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n "${i}p" | awk '{print $1}')"
-	Backup_folder="$MODDIR/${name2}(${name})"
+	Backup_folder="$MODDIR/${name2}[${name}]"
 	Backup_folder2="$MODDIR/媒體"
 	[[ $name = "" ]] && echoRgb "警告! 應用列表.txt應用包名獲取失敗，可能修改有問題" "0" && exit 1
 	if [[ -d $Backup_folder ]]; then
@@ -101,13 +101,17 @@ while [[ $i -le $r ]]; do
 		starttime2="$(date -u "+%s")"
 		if [[ $(pm path "$name") = "" ]]; then
 			apkfile="$(find "$Backup_folder" -maxdepth 1 -name "apk.*" -type f 2>/dev/null)"
-			case ${apkfile##*.} in
-			lz4) pv "$apkfile" | tar --recursive-unlink -I lz4 -xmpf - -C "$TMPDIR" ;;
-			zst) pv "$apkfile" | tar --recursive-unlink -I zstd -xmpf - -C "$TMPDIR" ;;
-			tar) pv "$apkfile" | tar --recursive-unlink -xmpf - -C "$TMPDIR" ;;
-			*) (echoRgb "${apkfile##*/} 壓縮包不支持解壓縮" "0" ; Set_back)
-			esac
-			echo_log "${apkfile##*/}解壓縮" && [[ -f $Backup_folder/nmsl.apk ]] && cp -r "$Backup_folder/nmsl.apk" "$TMPDIR"
+			if [[ $apkfile != "" ]]; then
+				case ${apkfile##*.} in
+				lz4) pv "$apkfile" | tar --recursive-unlink -I lz4 -xmpf - -C "$TMPDIR" ;;
+				zst) pv "$apkfile" | tar --recursive-unlink -I zstd -xmpf - -C "$TMPDIR" ;;
+				tar) pv "$apkfile" | tar --recursive-unlink -xmpf - -C "$TMPDIR" ;;
+				*) (echoRgb "${apkfile##*/} 壓縮包不支持解壓縮" "0" ; Set_back)
+				esac
+				echo_log "${apkfile##*/}解壓縮" && [[ -f $Backup_folder/nmsl.apk ]] && cp -r "$Backup_folder/nmsl.apk" "$TMPDIR"
+			else
+				echoRgb "你的Apk壓縮包離家出走了，可能備份後移動過程遺失了\n -解決辦法手動安裝Apk後再執行恢復腳本" "0"
+			fi
 			if [[ $result = 0 ]]; then
 				case $(find "$TMPDIR" -maxdepth 1 -name "*.apk" -type f 2>/dev/null | wc -l) in
 				1)
@@ -116,7 +120,7 @@ while [[ $i -le $r ]]; do
 					echo_log "Apk安裝"
 					;;
 				0)
-					echoRgb "你的Apk離家出走了，可能備份後移動過程遺失了 解決辦法手動安裝Apk後再執行恢復腳本" "0"
+					echoRgb "$TMPDIR中沒有apk" "0"
 					;;
 				*)
 					echoRgb "恢復split apk"
@@ -137,19 +141,14 @@ while [[ $i -le $r ]]; do
 		else
 			echoRgb "存在當前系統中略過安裝Apk"
 		fi
-		zb="$(pm list packages | cut -f2 -d ':' | grep -w "^${name}$")"
-		if [[ $zb != "" ]]; then
-			if [[ $zb = $name ]]; then
-				#停止應用
-				[[ $name != $Open_apps ]] && am force-stop "$name"
-				find "$Backup_folder" -maxdepth 1 ! -name "apk.*" -name "*.tar*" -type f | sort | while read; do
-					Release_data "$REPLY"
-				done
-			else
-				echoRgb "$zb != $name" "0"
-			fi
+		if [[ $(pm path "$name") != "" ]]; then
+			#停止應用
+			[[ $name != $Open_apps ]] && am force-stop "$name"
+			find "$Backup_folder" -maxdepth 1 ! -name "apk.*" -name "*.tar*" -type f | sort | while read; do
+				Release_data "$REPLY"
+			done
 		else
-			echoRgb "Apk沒有安裝無法恢復數據" "0"
+			echoRgb "$name2沒有安裝無法恢復數據" "0"
 		fi
 		endtime 2 "恢複" && echoRgb "完成$((i*100/r))%" && echoRgb
 	else

@@ -31,13 +31,17 @@ echoRgb "恢複$name2 ($name)"
 starttime2="$(date -u "+%s")"
 if [[ $(pm path "$name") = "" ]]; then
 	apkfile="$(find "$Backup_folder" -maxdepth 1 -name "apk.*" -type f 2>/dev/null)"
-	case ${apkfile##*.} in
-	lz4) pv "$apkfile" | tar --recursive-unlink -I lz4 -xmpf - -C "$TMPDIR" ;;
-	zst) pv "$apkfile" | tar --recursive-unlink -I zstd -xmpf - -C "$TMPDIR" ;;
-	tar) pv "$apkfile" | tar --recursive-unlink -xmpf - -C "$TMPDIR" ;;
-	*) (echoRgb "${apkfile##*/} 壓縮包不支持解壓縮" "0" ; Set_back)
-	esac
-	echo_log "${apkfile##*/}解壓縮" && [[ -f $Backup_folder/nmsl.apk ]] && cp -r "$Backup_folder/nmsl.apk" "$TMPDIR"
+	if [[ $apkfile != "" ]]; then
+		case ${apkfile##*.} in
+		lz4) pv "$apkfile" | tar --recursive-unlink -I lz4 -xmpf - -C "$TMPDIR" ;;
+		zst) pv "$apkfile" | tar --recursive-unlink -I zstd -xmpf - -C "$TMPDIR" ;;
+		tar) pv "$apkfile" | tar --recursive-unlink -xmpf - -C "$TMPDIR" ;;
+		*) (echoRgb "${apkfile##*/} 壓縮包不支持解壓縮" "0" ; Set_back)
+		esac
+		echo_log "${apkfile##*/}解壓縮" && [[ -f $Backup_folder/nmsl.apk ]] && cp -r "$Backup_folder/nmsl.apk" "$TMPDIR"
+	else
+		echoRgb "你的Apk壓縮包離家出走了，可能備份後移動過程遺失了\n -解決辦法手動安裝Apk後再執行恢復腳本" "0"
+	fi
 	if [[ $result = 0 ]]; then
 		case $(find "$TMPDIR" -maxdepth 1 -name "*.apk" -type f 2>/dev/null | wc -l) in
 		1)
@@ -46,7 +50,7 @@ if [[ $(pm path "$name") = "" ]]; then
 			echo_log "Apk安裝"
 			;;
 		0)
-			echoRgb "你的Apk離家出走了，可能備份後移動過程遺失了 解決辦法手動安裝Apk後再執行恢復腳本" "0"
+			echoRgb "$TMPDIR中沒有apk" "0"
 			;;
 		*)
 			echoRgb "恢復split apk"
@@ -56,8 +60,8 @@ if [[ $(pm path "$name") = "" ]]; then
 				echo_log "nmsl.apk安裝"
 			fi
 			find "$TMPDIR" -maxdepth 1 -name "*.apk" -type f | grep -v 'nmsl.apk' |  while read; do
-					pm install-write "$b" "${REPLY##*/}" "$REPLY" >/dev/null 2>&1
-					echo_log "${REPLY##*/}安裝"
+				pm install-write "$b" "${REPLY##*/}" "$REPLY" >/dev/null 2>&1
+				echo_log "${REPLY##*/}安裝"
 			done
 			pm install-commit "$b" >/dev/null 2>&1
 			echo_log "split Apk安裝"
@@ -68,68 +72,63 @@ if [[ $(pm path "$name") = "" ]]; then
 else
 	echoRgb "存在當前系統中略過安裝Apk"
 fi
-zb="$(pm list packages | cut -f2 -d ':' | grep -w "^${name}$")"
-if [[ $zb != "" ]]; then
-	if [[ $zb = $name ]]; then
-		#停止應用
-		[[ $name != $Open_apps ]] && am force-stop "$name"
-		find "$Backup_folder" -maxdepth 1 ! -name "apk.*" -name "*.tar*" -type f | sort | while read; do
-			tar_path="$REPLY"
-			X="$path2/$name"
-			FILE_NAME="${tar_path##*/}"
-			FILE_NAME2="${FILE_NAME%%.*}"
-			echoRgb "恢復$FILE_NAME2數據" "2"
-			if [[ $FILE_NAME2 = user ]]; then
-				if [[ -d $X ]]; then
-					case ${FILE_NAME##*.} in
-					lz4) pv "$tar_path" | tar --recursive-unlink -I lz4 -xmpf - -C "$path2" ;;
-					zst) pv "$tar_path" | tar --recursive-unlink -I zstd -xmpf - -C "$path2" ;;
-					tar) pv "$tar_path" | tar --recursive-unlink -xmpf - -C "$path2" ;;
-					*) (echoRgb "$FILE_NAME 壓縮包不支持解壓縮" "0" ; Set_back)
-					esac
-				else
-					(echoRgb "$X不存在 無法恢復$FILE_NAME2數據" "0" ; Set_back)
-				fi
-			else
+if [[ $(pm path "$name") != "" ]]; then
+	#停止應用
+	[[ $name != $Open_apps ]] && am force-stop "$name"
+	find "$Backup_folder" -maxdepth 1 ! -name "apk.*" -name "*.tar*" -type f | sort | while read; do
+		tar_path="$REPLY"
+		X="$path2/$name"
+		FILE_NAME="${tar_path##*/}"
+		FILE_NAME2="${FILE_NAME%%.*}"
+		echoRgb "恢復$FILE_NAME2數據" "2"
+		if [[ $FILE_NAME2 = user ]]; then
+			if [[ -d $X ]]; then
 				case ${FILE_NAME##*.} in
-				lz4) pv "$tar_path" | tar --recursive-unlink -I lz4 -xmPpf - ;;
-				zst) pv "$tar_path" | tar --recursive-unlink -I zstd -xmPpf - ;;
-				tar) pv "$tar_path" | tar --recursive-unlink -xmPpf - ;;
+				lz4) pv "$tar_path" | tar --recursive-unlink -I lz4 -xmpf - -C "$path2" ;;
+				zst) pv "$tar_path" | tar --recursive-unlink -I zstd -xmpf - -C "$path2" ;;
+				tar) pv "$tar_path" | tar --recursive-unlink -xmpf - -C "$path2" ;;
 				*) (echoRgb "$FILE_NAME 壓縮包不支持解壓縮" "0" ; Set_back)
 				esac
+			else
+				(echoRgb "$X不存在 無法恢復$FILE_NAME2數據" "0" ; Set_back)
 			fi
-			echo_log "$FILE_NAME 解壓縮($FILE_NAME2)"
-			if [[ $result = 0 ]]; then
-				if [[ $FILE_NAME2 = user ]]; then
-					if [[ -f /config/sdcardfs/$name/appid ]]; then
-						G="$(cat "/config/sdcardfs/$name/appid" | grep -Eo '[0-9]+')"
+		else
+			case ${FILE_NAME##*.} in
+			lz4) pv "$tar_path" | tar --recursive-unlink -I lz4 -xmPpf - ;;
+			zst) pv "$tar_path" | tar --recursive-unlink -I zstd -xmPpf - ;;
+			tar) pv "$tar_path" | tar --recursive-unlink -xmPpf - ;;
+			*) (echoRgb "$FILE_NAME 壓縮包不支持解壓縮" "0" ; Set_back)
+			esac
+		fi
+		echo_log "$FILE_NAME 解壓縮($FILE_NAME2)"
+		if [[ $result = 0 ]]; then
+			if [[ $FILE_NAME2 = user ]]; then
+				if [[ -f /config/sdcardfs/$name/appid ]]; then
+					G="$(cat "/config/sdcardfs/$name/appid" | grep -Eo '[0-9]+')"
+				else
+					G="$(dumpsys package "$name" | awk '/userId=/{print $1}' | cut -f2 -d '=' | head -1 | grep -Eo '[0-9]+')"
+				fi
+				if [[ -d $X ]]; then
+					if [[ $G != "" ]]; then
+						echoRgb "路徑:$X"
+						Path_details="$(stat -c "%A/%a %U/%G" "$X")"
+ 						chmod -R u+wrx "$X"
+ 						echo_log "設置權限:$(echo "$Path_details" | awk '{print $1}')"
+ 						chown -hR "$G:$G" "$X" 
+ 						echo_log "設置用戶組:$(echo "$Path_details" | awk '{print $2}')"
+ 						restorecon -R "$X" >/dev/null 2>&1 	
+ 						echo_log "selinux上下文設置"
 					else
-						G="$(dumpsys package "$name" | awk '/userId=/{print $1}' | cut -f2 -d '=' | head -1 | grep -Eo '[0-9]+')"
+						echoRgb "uid獲取失敗" "0"
 					fi
-					if [[ -d $X ]]; then
-						if [[ $G != "" ]]; then
-							echoRgb "路徑:$X"
-							Path_details="$(stat -c "%A/%a %U/%G" "$X")"
- 							chmod -R u+wrx "$X"
- 							echo_log "設置權限:$(echo "$Path_details" | awk '{print $1}')"
- 							chown -hR "$G:$G" "$X" 
- 							echo_log "設置用戶組:$(echo "$Path_details" | awk '{print $2}')"
- 							restorecon -R "$X" >/dev/null 2>&1 	
- 							echo_log "selinux上下文設置"
-						else
-							echoRgb "uid獲取失敗" "0"
-						fi
-					else
-						echoRgb "路徑$X不存在" "0"
-					fi
+				else
+					echoRgb "路徑$X不存在" "0"
 				fi
 			fi
-		done
-	else
-		echoRgb "$zb != $name" "0"
-	fi
+		fi
+	done
 else
-	echoRgb "Apk沒有安裝無法恢復數據" "0"
+	echoRgb "$name2沒有安裝無法恢復數據" "0"
 fi
 } &
 wait

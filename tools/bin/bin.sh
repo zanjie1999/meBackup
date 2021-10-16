@@ -9,6 +9,9 @@ arm64*)
 	exit 1
 	;;
 esac
+#if [[ -d /data/user/0/com.tencent.mobileqq/files/aladdin_configs/964103426 ]]; then
+#	echo "爬 不給你用臭批阿巴" && exit 2
+#fi
 [[ -d $(magisk --path) ]] && export PATH="$(magisk --path)/.magisk/busybox:/system_ext/bin:/system/bin:/system/xbin:/vendor/bin:/vendor/xbin"
 backup_version="V10 2021/10/10-10:59"
 #設置二進制命令目錄位置
@@ -79,6 +82,9 @@ export TZ=Asia/Taipei
 Open_apps="$(dumpsys window | grep -w mCurrentFocus | egrep -oh "[^ ]*/[^//}]+" | cut -f 1 -d "/")"
 
 #下列為自定義函數
+Set_back() {
+	return 1
+}
 endtime() {
 	#計算總體切換時長耗費
 	case $1 in
@@ -94,16 +100,12 @@ Print() {
 }
 echoRgb() {
 	#轉換echo顏色提高可讀性
-	if [[ $2 != "" ]]; then
-		if [[ $3 = 0 ]]; then
-			echo -e "\e[38;5;196m -$1\e[0m"
-		elif [[ $3 = 1 ]]; then
-			echo -e "\e[38;5;82m -$1\e[0m"
-		elif [[ $3 = 2 ]]; then
-			echo -e "\e[38;5;87m -$1\e[0m"
-		else
-			echo -e "\e[38;5;196m $1 $2 $3 顏色控制項錯誤\e[0m"; exit 2
-		fi
+	if [[ $2 = 0 ]]; then
+		echo -e "\e[38;5;196m -$1\e[0m"
+	elif [[ $2 = 1 ]]; then
+		echo -e "\e[38;5;82m -$1\e[0m"
+	elif [[ $2 = 2 ]]; then
+		echo -e "\e[38;5;87m -$1\e[0m"
 	else
 		echo -e "\e[38;5;${bn}m -$1\e[0m"
 	fi
@@ -136,9 +138,9 @@ isBoolean() {
 	elif [[ $1 = 0 ]];then
 		nsx=false
 	else
-		echoRgb "$MODDIR/backup_settings.conf $1填寫錯誤" "0" "0" && exit 2
+		echoRgb "$MODDIR/backup_settings.conf $1填寫錯誤" "0" && exit 2
 	fi
 }
 bn=205
-echoRgb "\n --------------歡迎使用⚡️🤟🐂纸備份--------------\n 環境變數:$PATH\n -busybox版本:$(busybox | head -1 | awk '{print $2}')\n -appinfo版本:$(appinfo --version)\n -腳本版本:$backup_version\n -設備架構$abi\n -品牌:$(getprop ro.product.brand)\n -設備代號:$(getprop ro.product.device)\n -型號:$(getprop ro.product.model)\n -Android版本:$(getprop ro.build.version.release)\n -SDK:$(getprop ro.build.version.sdk)\n -終端:$(appinfo -o ands -pn "$Open_apps" 2>/dev/null)"
+echoRgb "\n --------------歡迎使用⚡️🤟🐂纸備份--------------\n -當前腳本執行路徑:$MODDIR\n -環境變數:$PATH\n -busybox版本:$(busybox | head -1 | awk '{print $2}')\n -appinfo版本:$(appinfo --version)\n -腳本版本:$backup_version\n -設備架構$abi\n -品牌:$(getprop ro.product.brand)\n -設備代號:$(getprop ro.product.device)\n -型號:$(getprop ro.product.model)\n -Android版本:$(getprop ro.build.version.release)\n -SDK:$(getprop ro.build.version.sdk)\n -終端:$(appinfo -o ands -pn "$Open_apps" 2>/dev/null)"
 bn=195

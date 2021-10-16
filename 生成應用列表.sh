@@ -13,19 +13,11 @@ com.google.android.apps.messaging
 com.digibites.accubattery
 com.google.android.inputmethod.latin
 com.android.chrome"
-get_launcher() {
-	if [[ $(getprop ro.build.version.sdk) -gt 27 ]]; then
-		# 获取默认桌面
-		launcher_app="$(pm resolve-activity --brief -c android.intent.category.HOME -a android.intent.action.MAIN | grep '/' | cut -f1 -d '/')"
-		for launcher_app in $launcher_app; do
-			if [[ $launcher_app != "" && $launcher_app != "android" ]]; then
-				if [[ $(pgrep -f "$launcher_app" | grep -v 'grep' | wc -l) -ge 1 ]]; then
-					echo "$launcher_app"
-				fi
-			fi
-		done
-	fi
-}
+# 获取默认桌面
+launcher_app="$(pm resolve-activity --brief -c android.intent.category.HOME -a android.intent.action.MAIN | grep '/' | cut -f1 -d '/')"
+for launcher_app in $launcher_app; do
+	[[ $launcher_app != "android" ]] && [[ $(pgrep -f "$launcher_app" | grep -v 'grep' | wc -l) -ge 1 ]] && launcher_app="$launcher_app"
+done
 isBoolean "$path" && txtpath="$nsx"
 [[ $txtpath = true ]] && txtpath="$PWD" || txtpath="$MODDIR"
 nametxt="$txtpath/應用列表.txt"
@@ -36,7 +28,7 @@ i=1
 bn=118
 rm -rf "$MODDIR/tmp"
 starttime1="$(date -u "+%s")"
-appinfo -d " " -o ands,pn -pn $system $(get_launcher) -3 2>/dev/null | sort | sed 's/\///g' | while read name; do
+appinfo -d " " -o ands,pn -pn $system $launcher_app -3 2>/dev/null | sort | sed 's/\///g ; s/\://g ; s/(//g ; s/)//g ; s/\[//g ; s/\]//g ; s/\-//g' | while read name; do
 	[[ $bn -ge 229 ]] && bn=118
 	app_1=($name $name)
 	if [[ $(cat "$nametxt" | grep -oE "${app_1[1]}$") = "" ]]; then
@@ -47,7 +39,7 @@ appinfo -d " " -o ands,pn -pn $system $(get_launcher) -3 2>/dev/null | sort | se
 	fi
 	[[ $xz != "" ]] && let i++ bn++
 done
-sed -ie '/^$/d' "$nametxt" && rm -rf "$MODDIR/應用列表.txte"
+[[ -f $nametxt ]] && (sed -ie '/^$/d' "$nametxt" && rm -rf "$MODDIR/應用列表.txte") || (echoRgb "$nametxt生成失敗" "0" && exit 2)
 endtime 1
 [[ ! -e $MODDIR/tmp ]] && echoRgb "無新增應用" || echoRgb "輸出包名結束 請查看$nametxt"
 rm -rf "$MODDIR/tmp"

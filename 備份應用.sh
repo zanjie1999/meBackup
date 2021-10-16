@@ -7,14 +7,16 @@ script="${0##*/}"
 [[ $(echo "$MODDIR" | grep -v 'mt') = "" ]] && echo "我他媽骨灰給你揚了撒了TM不解壓縮？用毛線 憨批" && exit 1
 [[ ! -d $tools_path ]] && echo "$tools_path目錄遺失" && exit 1
 [[ ! -d $script_path ]] && echo "$script_path目錄遺失" && exit 1
+[[ ! -d $tools_path/META-INF ]] && echo "$tools_path/META-INF目錄遺失" && exit 1
+[[ ! -d $tools_path/apk ]] && echo "$tools_path/apk目錄遺失" && exit 1
 . "$bin_path/bin.sh"
 . "$MODDIR/backup_settings.conf"
 case $MODDIR in
-/storage/emulated/0/Android/*|/data/media/0/Android/*|/sdcard/Android/*) echoRgb "請勿在$MODDIR內備份" "0" "0" && exit 2 ;;
+/storage/emulated/0/Android/*|/data/media/0/Android/*|/sdcard/Android/*) echoRgb "請勿在$MODDIR內備份" "0" && exit 2 ;;
 esac
-[[ ! -f $MODDIR/backup_settings.conf ]] && echoRgb "backup_settings.conf遺失" "0" "0" && exit 1
+[[ ! -f $MODDIR/backup_settings.conf ]] && echoRgb "backup_settings.conf遺失" "0" && exit 1
 if [[ $(pgrep -f "$script" | grep -v grep | wc -l) -ge 2 ]]; then
-	echoRgb "檢測到進程殘留，請重新執行腳本 已銷毀進程" "0" "0"
+	echoRgb "檢測到進程殘留，請重新執行腳本 已銷毀進程" "0"
 	pgrep -f "$script" | grep -v grep | while read i; do
 		[[ $i != "" ]] && kill -9 " $i" >/dev/null
 	done
@@ -36,6 +38,9 @@ i=1
 #數據目錄
 path="/data/media/0/Android"
 path2="/data/user/0"
+TMPDIR="/data/local/tmp"
+apklist="$MODDIR/apklist"
+[[ ! -d $TMPDIR ]] && mkdir "$TMPDIR"
 if [[ $path3 = true ]]; then
 	Backup="$PWD/Backup_$Compression_method"
 	txt="$PWD/應用列表.txt"
@@ -43,36 +48,38 @@ else
 	Backup="$MODDIR/Backup_$Compression_method"
 	txt="$MODDIR/應用列表.txt"
 fi
-PU="$(ls /dev/block/vold | grep public 2>/dev/null)"
-[[ ! -f $txt ]] && echoRgb "請執行\"生成應用列表.sh\"獲取應用列表再來備份" "0" "0" && exit 1
+PU="$(ls /dev/block/vold | grep public)"
+[[ ! -f $txt ]] && echoRgb "請執行\"生成應用列表.sh\"獲取應用列表再來備份" "0" && exit 1
 r="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n '$=')"
-[[ $r = "" ]] && echoRgb "爬..應用列表.txt是空的或是包名被注釋了這樣備份個鬼" "0" "0" && exit 1
+[[ $r = "" ]] && echoRgb "爬..應用列表.txt是空的或是包名被注釋了這樣備份個鬼" "0" && exit 1
 data=/data
 hx="本地"
 if [[ $(pm path ice.message) = "" ]]; then
-	echoRgb "未安裝toast 開始安裝" "0" "0"
-	cp -r "$tools_path/apk"/*.apk /data/local/tmp && pm install --user 0 -r /data/local/tmp/*.apk >/dev/null 2>&1 && rm -rf /data/local/tmp/* 
-	[[ $? = 0 ]] && echoRgb "安裝toast成功" "0" "1" || echoRgb "安裝toast失敗" "0" "0"
+	echoRgb "未安裝toast 開始安裝" "0"
+	cp -r "$tools_path/apk"/*.apk "$TMPDIR" && pm install --user 0 -r "$TMPDIR"/*.apk &>/dev/null && rm -rf "$TMPDIR"/* 
+	[[ $? = 0 ]] && echoRgb "安裝toast成功" "1" || echoRgb "安裝toast失敗" "0"
 fi
 echoRgb "-壓縮方式:$Compression_method"
-echoRgb "-提示 腳本支持後台壓縮 可以直接離開腳本\n -或是關閉終端也能備份 如需終止腳本\n -請再次執行$script即可停止\n -備份結束將發送toast提示語" "0" "2"
-if [[ -d /proc/scsi/usb-storage || $PU != "" ]]; then
-	PT="$(cat /proc/mounts | grep "$PU" | awk '{print $2}')"
-	echoRgb "檢測到usb 是否在usb備份\n 音量上是，音量下不是"
-	get_version "USB備份" "本地備份"
-	if $branch = true ]]; then
-		Backup="$PT/Backup_$Compression_method"
-		data="/dev/block/vold/$PU"
-		hx="USB"
+echoRgb "-提示 腳本支持後台壓縮 可以直接離開腳本\n -或是關閉終端也能備份 如需終止腳本\n -請再次執行$script即可停止\n -備份結束將發送toast提示語" "2"
+if [[ $PU != "" ]]; then
+	[[ -f /proc/mounts ]] && PT="$(cat /proc/mounts | grep "$PU" | awk '{print $2}')"
+	if [[ -d $PT ]]; then
+		echoRgb "檢測到usb 是否在usb備份\n 音量上是，音量下不是"
+		get_version "USB備份" "本地備份"
+		if $branch = true ]]; then
+			Backup="$PT/Backup_$Compression_method"
+			data="/dev/block/vold/$PU"
+			hx="USB"
+		fi
 	fi
 else
-	echoRgb "沒有檢測到USB於本地備份" "0" "2"
+	echoRgb "沒有檢測到USB於本地備份" "2"
 fi
-[[ $Backup_user_data = false ]] && echoRgb "當前backup_settings.conf的Backup_user_data為0將不備份user數據" "0" "0"
-[[ $Backup_obb_data = false ]] && echoRgb "當前backup_settings.conf的Backup_obb_data為0將不備份外部數據" "0" "0"
+[[ $Backup_user_data = false ]] && echoRgb "當前backup_settings.conf的Backup_user_data為0將不備份user數據" "0"
+[[ $Backup_obb_data = false ]] && echoRgb "當前backup_settings.conf的Backup_obb_data為0將不備份外部數據" "0"
 [[ ! -d $Backup ]] && mkdir -p "$Backup"
 [[ ! -f $Backup/應用列表.txt ]] && echo "#不需要恢復還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安" >"$Backup/應用列表.txt"
-[[ ! -d $Backup/tools ]] && cp -r "$bin_path" "$Backup" && cp -r "$tools_path/apk" "$Backup/bin" && rm -rf "$Backup/bin/toast" "$Backup/bin/appin"* "$Backup/bin/zip"
+[[ ! -d $Backup/tools ]] && cp -r "$bin_path" "$Backup" && cp -r "$tools_path/apk" "$Backup/bin" && rm -rf "$Backup/bin/toast" "$Backup/bin/zip"
 [[ ! -f $Backup/還原備份.sh ]] && cp -r "$script_path/restore" "$Backup/還原備份.sh"
 [[ ! -f $Backup/掃描資料夾名.sh ]] && cp -r "$script_path/Get_DirName" "$Backup/掃描資料夾名.sh"
 
@@ -82,9 +89,9 @@ Quantity=0
 #顯示執行結果
 echo_log() {
 	if [[ $? = 0 ]]; then
-		echoRgb "$1成功" "0" "1" && result=0
+		echoRgb "$1成功" "1" && result=0
 	else
-		echoRgb "$1備份失敗，過世了" "0" "0" && result=1 && let ERROR++
+		echoRgb "$1備份失敗，過世了" "0" && result=1 && let ERROR++
 	fi
 }
 #檢測apk狀態進行備份
@@ -96,20 +103,29 @@ Backup_apk() {
 		unset xb && result=0
 		echoRgb "Apk版本無更新 跳過備份"
 	else
-		[[ $lxj -ge 95 ]] && echoRgb "$data空間不足,達到$lxj%" "0" "0" && exit 2
+		[[ $lxj -ge 95 ]] && echoRgb "$data空間不足,達到$lxj%" "0" && exit 2
 		rm -rf "$Backup_folder"/*.apk
 		#備份apk
 		echoRgb "$1"
-		#[[ $name != $Open_apps ]] && am force-stop "$name"
+		[[ $name != $Open_apps ]] && am force-stop "$name"
+		rm -rf "$apklist"
 		echo "$apk_path" | sed -e '/^$/d' | while read; do
 			path="$REPLY"
 			b_size="$(ls -l "$path" | awk '{print $5}')"
 			k_size="$(awk 'BEGIN{printf "%.2f\n", "'$b_size'"/'1024'}')"
 			m_size="$(awk 'BEGIN{printf "%.2f\n", "'$k_size'"/'1024'}')"
-			echoRgb "${path##*/} ${m_size}MB(${k_size}KB)" "0" "2"
+			echoRgb "${path##*/} ${m_size}MB(${k_size}KB)" "2" ; echo "${path##*/}">>"$apklist"
 		done
-		apk_path="$(echo "$apk_path" | head -1)"
-		cp -r "${apk_path%/*}"/*.apk "$Backup_folder/"
+		if [[ -f $apklist ]]; then
+			apk_path="$(echo "$apk_path" | head -1)" ; apk_path="${apk_path%/*}"
+			case $Compression_method in
+			tar|TAR|Tar) tar -C "$apk_path" -cf "$Backup_folder/apk.tar" -T "$apklist" ;;
+			lz4|LZ4|Lz4) tar -C "$apk_path" -cf - -T "$apklist" | lz4 -1 >"$Backup_folder/apk.tar.lz4" ;;
+			zstd|Zstd|ZSTD) tar -C "$apk_path" -cf - -T "$apklist" | zstd -r -T0 -6 -q >"$Backup_folder/apk.tar.zst" ;;
+			esac
+		else
+			echoRgb "apklist不存在" "0"
+		fi
 		echo_log "備份$apk_number個Apk"
 		if [[ $result = 0 ]]; then
 			echo "apk_version=\"$(dumpsys package "$name" | awk '/versionName=/{print $1}' | cut -f2 -d '=' | head -1)\"" >>"$app_details"
@@ -131,7 +147,7 @@ Backup_apk() {
 		done
 		[[ -f $(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null) && $(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null | wc -l) = 1 ]] && cp -r "$(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null)" "$Backup_folder/nmsl.apk"
 	fi
-	unset PackageName ; D=1
+	unset ChineseName PackageName ; D=1
 }
 #檢測數據位置進行備份
 Backup_data() {
@@ -144,22 +160,22 @@ Backup_data() {
 	esac
 	if [[ -d $data_path ]]; then
 		if [[ $Size != $(du -ks "$data_path" | awk '{print $1}') ]]; then
-			[[ $lxj -ge 95 ]] && echoRgb "$data空間不足,達到$lxj%" "0" "0" && exit 2
-			echoRgb "備份$1數據" "0" "2"
+			[[ $lxj -ge 95 ]] && echoRgb "$data空間不足,達到$lxj%" "0" && exit 2
+			echoRgb "備份$1數據" "2"
 			case $1 in
 			user)
 				case $Compression_method in
 				tar|Tar|TAR) tar --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" -cpf - -C "${data_path%/*}" "${data_path##*/}" 2>/dev/null | pv >"$Backup_folder/$1.tar" ;;
 				zstd|Zstd|ZSTD) tar --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" -cpf - -C "${data_path%/*}" "${data_path##*/}" 2>/dev/null | pv | zstd -r -T0 -6 -q >"$Backup_folder/$1.tar.zst" ;;
 				lz4|Lz4|LZ4) tar --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" -cpf - -C "${data_path%/*}" "${data_path##*/}" 2>/dev/null | pv | lz4 -1 >"$Backup_folder/$1.tar.lz4" ;;
-				*) echoRgb "$Compression_method為不支持的壓縮算法" "0" "0" && rm -rf "$Backup" && exit 2 ;;
+				*) echoRgb "$Compression_method為不支持的壓縮算法" "0" && rm -rf "$Backup" && exit 2 ;;
 				esac ;;
 			*)
 				case $Compression_method in
 				tar|Tar|TAR) tar --exclude="Backup_"* -cPpf - "$data_path" 2>/dev/null | pv >"$Backup_folder/$1.tar" ;;
 				zstd|Zstd|ZSTD) tar --exclude="Backup_"* -cPpf - "$data_path" 2>/dev/null | pv | zstd -r -T0 -6 -q >"$Backup_folder/$1.tar.zst" ;;
 				lz4|Lz4|LZ4) tar --exclude="Backup_"* -cPpf - "$data_path" 2>/dev/null | pv | lz4 -1 >"$Backup_folder/$1.tar.lz4" ;;
-				*) echoRgb "$Compression_method為不支持的壓縮算法" "0" "0" && rm -rf "$Backup" && exit 2 ;;
+				*) echoRgb "$Compression_method為不支持的壓縮算法" "0" && rm -rf "$Backup" && exit 2 ;;
 				esac ;;
 			esac
 			echo_log "備份$1數據"
@@ -193,6 +209,7 @@ get_version "生成" "不生成" && recovery_backup="$branch"
 [[ $recovery_backup = true ]] && echo "#不需要恢復還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安" >"$script_path/應用列表.txt"
 #開始循環$txt內的資料進行備份
 #記錄開始時間
+rm -rf "$apklist"
 starttime1="$(date -u "+%s")"
 TIME="$starttime1"
 #記錄error次數起點
@@ -205,16 +222,16 @@ while [[ $i -le $r ]]; do
 	lxj="$(df -h "$data" | awk 'END{print $4}' | sed 's/%//g')"
 	if [[ $name2 = *! || $name2 = *！ ]]; then
 		name2="$(echo "$name2" | sed 's/!//g ; s/！//g')"
-		echoRgb "跳過備份$name2 所有數據" "0" "0"
+		echoRgb "跳過備份$name2 所有數據" "0"
 		No_backupdata=1
 	else
 		[[ $No_backupdata != "" ]] && unset No_backupdata
 	fi
-	Backup_folder="$Backup/$name2($name)"
+	Backup_folder="$Backup/${name2}[${name}]"
 	app_details="$Backup_folder/app_details"
 	[[ -f $app_details ]] && . "$app_details"
-	[[ $name = "" ]] && echoRgb "警告! 應用列表.txt應用包名獲取失敗，可能修改有問題" "0" "0" && exit 1
-	Get_apklist="$(pm list packages "$name" | cut -f2 -d ':' | grep -w "^${name}$")"
+	[[ $name = "" ]] && echoRgb "警告! 應用列表.txt應用包名獲取失敗，可能修改有問題" "0" && exit 1
+	Get_apklist="$(pm list packages | cut -f2 -d ':' | grep -w "^${name}$")"
 	if [[ $Get_apklist != "" && $Get_apklist = $name ]]; then
 		starttime2="$(date -u "+%s")"
 		echoRgb "備份$name2 ($name)"
@@ -247,7 +264,7 @@ while [[ $i -le $r ]]; do
 		endtime 2 "$name2備份"
 		echoRgb "完成$((i*100/r))% $hx$(df -h "$data" | awk 'END{print "剩餘:"$3"使用率:"$4}')"
 	else
-		echoRgb "$name2[$name]不在安裝列表，備份個寂寞？" "0" "0"
+		echoRgb "$name2[$name]不在安裝列表，備份個寂寞？" "0"
 	fi
 	echoRgb
 	if [[ $i = $r ]]; then
@@ -274,7 +291,7 @@ while [[ $i -le $r ]]; do
 				echoRgb "輸出用於recovery的備份卡刷包"
 				rm -rf "$MODDIR/recovery卡刷備份.zip"
 				mkdir -p "$MODDIR/tmp"
-				tar -cpf - -C "$tools_path" "META-INF" "script" "bin" "apk" | tar --delete "script/restore3" --delete "bin/busybox_path" --delete "bin/lz4" --delete "bin/zip" --delete "bin/appinfo" --delete "bin/appinfo.dex" | pv | tar --recursive-unlink -xmpf - -C "$MODDIR/tmp"
+				tar -cpf - -C "$tools_path" "META-INF" "script" "bin" "apk" | tar --delete "script/restore3" --delete "bin/busybox_path" --delete "bin/lz4" --delete "bin/zip" | pv | tar --recursive-unlink -xmpf - -C "$MODDIR/tmp"
 				cd "$MODDIR/tmp"
 				zip -r "recovery卡刷備份.zip" *
 				mv "$MODDIR/tmp/recovery卡刷備份.zip" "$MODDIR"
@@ -284,13 +301,13 @@ while [[ $i -le $r ]]; do
 		fi
 	fi
 	if [[ $ERROR -ge 5 ]]; then
-		echoRgb "錯誤次數達到上限 環境已重設" "0" "0" && rm -rf "$filepath"
-		echoRgb "請重新執行腳本" "0" "0" && exit
+		echoRgb "錯誤次數達到上限 環境已重設" "0" && rm -rf "$filepath"
+		echoRgb "請重新執行腳本" "0" && exit
 	fi
 	let i++
 done
 
-echoRgb "你要備份跑路？祝你卡米9008" "0" "2"
+echoRgb "你要備份跑路？祝你卡米9008" "2"
 #計算出備份大小跟差異性
 filesizee="$(du -ks "$Backup" | awk '{print $1}')"
 dsize="$(($((filesizee - filesize)) / 1024))"
@@ -312,4 +329,4 @@ exit 0
 }&
 wait
 longToast "批量備份完成"
-Print "批量備份完成 執行過程請查看$Status_log"
+Print "批量備份完成 執行過程請查看$Status_log" && rm -rf "$apklist"

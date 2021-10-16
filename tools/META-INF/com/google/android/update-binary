@@ -16,6 +16,8 @@ unzip -o "$ZIPFILE" 'apk/Message.apk' -d "$MODDIR"
 unzip -o "$ZIPFILE" 'bin/pv' -d "$MODDIR"
 unzip -o "$ZIPFILE" 'bin/bin.sh' -d "$MODDIR"
 unzip -o "$ZIPFILE" 'bin/busybox' -d "$MODDIR"
+unzip -o "$ZIPFILE" 'bin/appinfo' -d "$MODDIR"
+unzip -o "$ZIPFILE" 'bin/appinfo.dex' -d "$MODDIR"
 unzip -o "$ZIPFILE" 'bin/tar' -d "$MODDIR"
 unzip -o "$ZIPFILE" 'bin/zstd' -d "$MODDIR"
 unzip -o "$ZIPFILE" 'script/restore' -d "$MODDIR"
@@ -44,6 +46,9 @@ isBoolean() {
 		ui_print "script/backup_settings.conf填寫錯誤" && exit 2
 	fi
 }
+Set_back() {
+	return 1
+}
 #设置环境
 export PATH="$MODDIR/xbin:$MODDIR/bin:$PATH"
 . "$MODDIR/script/backup_settings.conf"
@@ -55,9 +60,10 @@ isBoolean "$Backup_user_data" && Backup_user_data="$nsx"
 [[ ! -f $txt ]] && ui_print "$txt缺少" && exit 1
 r="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n '$=')"
 [[ $r = "" ]] && ui_print "爬..應用列表.txt是空的備份個鬼" && exit 0
-path=/data/media/0/Android
-path2=/data/data
-data=/data
+path="/data/media/0/Android"
+path2="/data/data"
+data="/data"
+apklist="$MODDIR/apklist"
 Backup="/data/media/0/TWRP/Backup_$Compression_method"
 [[ ! -d $Backup ]] && mkdir -p "$Backup" || rm -rf "$Backup"/*
 [[ ! -f $Backup/應用列表.txt ]] && echo "#不需要恢復還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安" >"$Backup/應用列表.txt"
@@ -84,15 +90,23 @@ Backup_apk() {
 	[[ $lxj -ge 95 ]] && ui_print "$data空間不足,達到$lxj%" && exit 2
 	rm -rf "$Backup_folder"/*.apk
 	[[ $(cat "$Backup/應用列表.txt" | grep -v "#" | sed -e '/^$/d' | awk '{print $2}' | grep -w "^${name}$" | head -1) = "" ]] && echo "$name2 $name" >>"$Backup/應用列表.txt"
-	find "$apk_path/" -maxdepth 1 -name "*.apk" -type f | while read aof; do
-		path="$aof"
+	rm -rf "$apklist"
+	find "$apk_path" -maxdepth 1 -name "*.apk" -type f | while read; do
+		path="$REPLY"
 		b_size="$(ls -l "$path" | awk '{print $5}')"
 		k_size="$(awk 'BEGIN{printf "%.2f\n", "'$b_size'"/'1024'}')"
 		m_size="$(awk 'BEGIN{printf "%.2f\n", "'$k_size'"/'1024'}')"
-		ui_print "$(basename "$path") ${m_size}MB(${k_size}KB)"
+		ui_print "${path##*/} ${m_size}MB(${k_size}KB)" ; echo "${path##*/}">>"$apklist"
 	done
-	apk_path="$(echo "$apk_path" | head -1)"
-	cp -r "$apk_path"/*.apk "$Backup_folder/"
+	if [[ $? = 0 && -f $apklist ]]; then
+		apk_path="$(echo "$apk_path" | head -1)"
+		case $Compression_method in
+			tar|TAR|Tar) tar -C "$apk_path" -cf "$Backup_folder/apk.tar" -T "$apklist" ;;
+			zstd|Zstd|ZSTD) tar -C "$apk_path" -cf - -T "$apklist" | zstd -r -T0 -6 -q >"$Backup_folder/apk.tar.zst" ;;
+		esac
+	else
+		(echoRgb "find出現錯誤或是apklist不存在" "0" ; Set_back)
+	fi
 	echo_log "備份$apk_number個Apk"
 	if [[ $result = 0 ]]; then
 		[[ $PackageName = "" ]] && echo "PackageName=\"$name\"" >>"$app_details"
@@ -171,7 +185,7 @@ while [[ $i -le $r ]]; do
 	else
 		[[ $No_backupdata != "" ]] && unset No_backupdata
 	fi
-	Backup_folder="$Backup/$name2($name)"
+	Backup_folder="$Backup/${name2}_${name}"
 	app_details="$Backup_folder/app_details"
 	[[ -f $app_details ]] && . "$app_details"
 	[[ $name = "" ]] && ui_print "警告! 應用列表.txt應用包名獲取失敗，可能修改有問題" && exit 1
@@ -181,7 +195,7 @@ while [[ $i -le $r ]]; do
 		ui_print "備份$name2 ($name)"
 		[[ $name = com.tencent.mobileqq ]] && ui_print "QQ可能恢復備份失敗或是丟失聊天記錄，請自行用你信賴的軟件備份"
 		[[ $name = com.tencent.mm ]] && ui_print "WX可能恢復備份失敗或是丟失聊天記錄，請自行用你信賴的軟件備份"
-		apk_number="$(find "$apk_path/" -maxdepth 1 -name "*.apk" -type f 2>/dev/null | wc -l)"
+		apk_number="$(find "$apk_path" -maxdepth 1 -name "*.apk" -type f 2>/dev/null | wc -l)"
 		if [[ $apk_number = 1 ]]; then
 			if [[ $Splist = false ]]; then
 				Backup_apk "非Split Apk"

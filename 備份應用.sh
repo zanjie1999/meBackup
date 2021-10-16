@@ -14,6 +14,10 @@ script="${0##*/}"
 case $MODDIR in
 /storage/emulated/0/Android/*|/data/media/0/Android/*|/sdcard/Android/*) echoRgb "請勿在$MODDIR內備份" "0" && exit 2 ;;
 esac
+case $Compression_method in
+zstd|Zstd|ZSTD|tar|Tar|TAR|lz4|Lz4|LZ4) ;;
+*) echoRgb "$Compression_method為不支持的壓縮算法" "0" &&  exit 2 ;;
+esac
 [[ ! -f $MODDIR/backup_settings.conf ]] && echoRgb "backup_settings.conf遺失" "0" && exit 1
 if [[ $(pgrep -f "$script" | grep -v grep | wc -l) -ge 2 ]]; then
 	echoRgb "檢測到進程殘留，請重新執行腳本 已銷毀進程" "0"
@@ -124,7 +128,7 @@ Backup_apk() {
 			zstd|Zstd|ZSTD) tar -C "$apk_path" -cf - -T "$apklist" | zstd -r -T0 -6 -q >"$Backup_folder/apk.tar.zst" ;;
 			esac
 		else
-			echoRgb "apklist不存在" "0"
+			(echoRgb "apklist不存在" "0" ; Set_back)
 		fi
 		echo_log "備份$apk_number個Apk"
 		if [[ $result = 0 ]]; then
@@ -168,14 +172,12 @@ Backup_data() {
 				tar|Tar|TAR) tar --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" -cpf - -C "${data_path%/*}" "${data_path##*/}" 2>/dev/null | pv >"$Backup_folder/$1.tar" ;;
 				zstd|Zstd|ZSTD) tar --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" -cpf - -C "${data_path%/*}" "${data_path##*/}" 2>/dev/null | pv | zstd -r -T0 -6 -q >"$Backup_folder/$1.tar.zst" ;;
 				lz4|Lz4|LZ4) tar --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" -cpf - -C "${data_path%/*}" "${data_path##*/}" 2>/dev/null | pv | lz4 -1 >"$Backup_folder/$1.tar.lz4" ;;
-				*) echoRgb "$Compression_method為不支持的壓縮算法" "0" && rm -rf "$Backup" && exit 2 ;;
 				esac ;;
 			*)
 				case $Compression_method in
 				tar|Tar|TAR) tar --exclude="Backup_"* -cPpf - "$data_path" 2>/dev/null | pv >"$Backup_folder/$1.tar" ;;
 				zstd|Zstd|ZSTD) tar --exclude="Backup_"* -cPpf - "$data_path" 2>/dev/null | pv | zstd -r -T0 -6 -q >"$Backup_folder/$1.tar.zst" ;;
 				lz4|Lz4|LZ4) tar --exclude="Backup_"* -cPpf - "$data_path" 2>/dev/null | pv | lz4 -1 >"$Backup_folder/$1.tar.lz4" ;;
-				*) echoRgb "$Compression_method為不支持的壓縮算法" "0" && rm -rf "$Backup" && exit 2 ;;
 				esac ;;
 			esac
 			echo_log "備份$1數據"

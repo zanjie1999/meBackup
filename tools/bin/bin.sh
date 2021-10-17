@@ -22,6 +22,7 @@ Status_log="$MODDIR/執行狀態日誌.txt"
 rm -rf "$Status_log"
 filepath="/data/backup_tools"
 busybox="$filepath/busybox"
+busybox2="$bin_path/busybox"
 #排除自身
 exclude="
 busybox_path
@@ -38,10 +39,10 @@ fi
 #刪除無效軟連結
 find -L "$filepath" -maxdepth 1 -type l -exec rm -rf {} \;
 if [[ -d $bin_path ]]; then
-	[[ ! -f $bin_path/busybox ]] && echo "$bin_path/busybox不存在" && exit 1
+	[[ ! -f $busybox2 ]] && echo "$busybox2不存在" && exit 1
 	if [[ -f $busybox ]]; then
 		filemd5="$(md5sum "$busybox" | cut -d" " -f1)"
-		filemd5_1="$(md5sum "$bin_path/busybox" | cut -d" " -f1)"
+		filemd5_1="$(md5sum "$busybox2" | cut -d" " -f1)"
 		if [[ $filemd5 != $filemd5_1 ]]; then
 			echo "busybox md5不一致 重新創立環境中"
 			rm -rf "$filepath"/*
@@ -67,7 +68,7 @@ if [[ -d $bin_path ]]; then
 	"$busybox" --list | while read; do
 		if [[ $REPLY != tar && ! -f $filepath/$REPLY ]]; then
 			ln -fs "$busybox" "$filepath/$REPLY"
-		fi		
+		fi
 	done
 else
 	echo "遺失$bin_path"
@@ -141,6 +142,6 @@ isBoolean() {
 		echoRgb "$MODDIR/backup_settings.conf $1填寫錯誤" "0" && exit 2
 	fi
 }
-bn=205
+bn=147
 echoRgb "\n --------------歡迎使用⚡️🤟🐂纸備份--------------\n -當前腳本執行路徑:$MODDIR\n -環境變數:$PATH\n -busybox版本:$(busybox | head -1 | awk '{print $2}')\n -appinfo版本:$(appinfo --version)\n -腳本版本:$backup_version\n -設備架構$abi\n -品牌:$(getprop ro.product.brand)\n -設備代號:$(getprop ro.product.device)\n -型號:$(getprop ro.product.model)\n -Android版本:$(getprop ro.build.version.release)\n -SDK:$(getprop ro.build.version.sdk)\n -終端:$(appinfo -o ands -pn "$Open_apps" 2>/dev/null)"
 bn=195

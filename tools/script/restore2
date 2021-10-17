@@ -112,7 +112,7 @@ if [[ $(pm path "$name") != "" ]]; then
 					if [[ $G != "" ]]; then
 						echoRgb "路徑:$X"
 						Path_details="$(stat -c "%A/%a %U/%G" "$X")"
- 						chmod -R u+wrx "$X"
+ 						chmod -R 700 "$X"
  						echo_log "設置權限:$(echo "$Path_details" | awk '{print $1}')"
  						chown -hR "$G:$G" "$X" 
  						echo_log "設置用戶組:$(echo "$Path_details" | awk '{print $2}')"

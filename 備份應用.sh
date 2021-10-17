@@ -43,7 +43,6 @@ i=1
 path="/data/media/0/Android"
 path2="/data/user/0"
 TMPDIR="/data/local/tmp"
-apklist="$MODDIR/apklist"
 [[ ! -d $TMPDIR ]] && mkdir "$TMPDIR"
 if [[ $path3 = true ]]; then
 	Backup="$PWD/Backup_$Compression_method"
@@ -86,7 +85,6 @@ fi
 [[ ! -d $Backup/tools ]] && cp -r "$bin_path" "$Backup" && cp -r "$tools_path/apk" "$Backup/bin" && rm -rf "$Backup/bin/toast" "$Backup/bin/zip"
 [[ ! -f $Backup/還原備份.sh ]] && cp -r "$script_path/restore" "$Backup/還原備份.sh"
 [[ ! -f $Backup/掃描資料夾名.sh ]] && cp -r "$script_path/Get_DirName" "$Backup/掃描資料夾名.sh"
-
 filesize="$(du -ks "$Backup" | awk '{print $1}')"
 #調用二進制
 Quantity=0
@@ -95,7 +93,7 @@ echo_log() {
 	if [[ $? = 0 ]]; then
 		echoRgb "$1成功" "1" && result=0
 	else
-		echoRgb "$1備份失敗，過世了" "0" && result=1 && let ERROR++
+		echoRgb "$1失敗，過世了" "0" && result=1 && let ERROR++
 	fi
 }
 #檢測apk狀態進行備份
@@ -104,7 +102,7 @@ Backup_apk() {
 	[[ ! -d $Backup_folder ]] && mkdir -p "$Backup_folder"
 	[[ $(cat "$Backup/應用列表.txt" | grep -v "#" | sed -e '/^$/d' | awk '{print $2}' | grep -w "^${name}$" | head -1) = "" ]] && echo "$name2 $name" >>"$Backup/應用列表.txt"
 	if [[ $apk_version = $(dumpsys package "$name" | awk '/versionName=/{print $1}' | cut -f2 -d '=' | head -1) ]]; then
-		unset xb && result=0
+		unset xb ; result=0
 		echoRgb "Apk版本無更新 跳過備份"
 	else
 		[[ $lxj -ge 95 ]] && echoRgb "$data空間不足,達到$lxj%" "0" && exit 2
@@ -112,23 +110,19 @@ Backup_apk() {
 		#備份apk
 		echoRgb "$1"
 		[[ $name != $Open_apps ]] && am force-stop "$name"
-		rm -rf "$apklist"
 		echo "$apk_path" | sed -e '/^$/d' | while read; do
 			path="$REPLY"
 			b_size="$(ls -l "$path" | awk '{print $5}')"
 			k_size="$(awk 'BEGIN{printf "%.2f\n", "'$b_size'"/'1024'}')"
 			m_size="$(awk 'BEGIN{printf "%.2f\n", "'$k_size'"/'1024'}')"
-			echoRgb "${path##*/} ${m_size}MB(${k_size}KB)" "2" ; echo "${path##*/}">>"$apklist"
+			echoRgb "${path##*/} ${m_size}MB(${k_size}KB)" "2"
 		done
-		if [[ -f $apklist ]]; then
-			case $Compression_method in
-			tar|TAR|Tar) tar -C "$apk_path2" -cf "$Backup_folder/apk.tar" -T "$apklist" ;;
-			lz4|LZ4|Lz4) tar -C "$apk_path2" -cf - -T "$apklist" | lz4 -1 >"$Backup_folder/apk.tar.lz4" ;;
-			zstd|Zstd|ZSTD) tar -C "$apk_path2" -cf - -T "$apklist" | zstd -r -T0 -6 -q >"$Backup_folder/apk.tar.zst" ;;
-			esac
-		else
-			(echoRgb "apklist不存在" "0" ; Set_back)
-		fi
+		(cd "$apk_path2"
+		case $Compression_method in
+		tar|TAR|Tar) tar -cf "$Backup_folder/apk.tar" *.apk ;;
+		lz4|LZ4|Lz4) tar -cf - *.apk | lz4 -1 >"$Backup_folder/apk.tar.lz4" ;;
+		zstd|Zstd|ZSTD) tar -cf - *apk | zstd -r -T0 -6 -q >"$Backup_folder/apk.tar.zst" ;;
+		esac)
 		echo_log "備份$apk_number個Apk"
 		if [[ $result = 0 ]]; then
 			echo "apk_version=\"$(dumpsys package "$name" | awk '/versionName=/{print $1}' | cut -f2 -d '=' | head -1)\"" >>"$app_details"
@@ -136,20 +130,20 @@ Backup_apk() {
 			[[ $ChineseName = "" ]] && echo "ChineseName=\"$name2\"" >>"$app_details"
 			[[ ! -f $Backup_folder/還原備份.sh ]] && cp -r "$script_path/restore2" "$Backup_folder/還原備份.sh"
 		fi
+		if [[ $name = com.android.chrome ]]; then
+			#刪除所有舊apk ,保留一個最新apk進行備份
+			ReservedNum=1
+			FileNum="$(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null | wc -l)"
+			while [[ $FileNum -gt $ReservedNum ]]; do
+				OldFile="$(ls -rt /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null | head -1)"
+				echoRgb "刪除文件:${OldFile%/*/*}"
+				rm -rf "${OldFile%/*/*}"
+				let "FileNum--"
+			done
+			[[ -f $(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null) && $(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null | wc -l) = 1 ]] && cp -r "$(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null)" "$Backup_folder/nmsl.apk"
+		fi
 	fi
 	[[ $name = bin.mt.plus && -f $Backup_folder/base.apk ]] && cp -r "$Backup_folder/base.apk" "$Backup_folder.apk"
-	if [[ $name = com.android.chrome ]]; then
-		#刪除所有舊apk ,保留一個最新apk進行備份
-		ReservedNum=1
-		FileNum="$(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null | wc -l)"
-		while [[ $FileNum -gt $ReservedNum ]]; do
-			OldFile="$(ls -rt /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null | head -1)"
-			echoRgb "刪除文件:${OldFile%/*/*}"
-			rm -rf "${OldFile%/*/*}"
-			let "FileNum--"
-		done
-		[[ -f $(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null) && $(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null | wc -l) = 1 ]] && cp -r "$(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null)" "$Backup_folder/nmsl.apk"
-	fi
 	unset ChineseName PackageName ; D=1
 }
 #檢測數據位置進行備份
@@ -210,7 +204,6 @@ get_version "生成" "不生成" && recovery_backup="$branch"
 [[ $recovery_backup = true ]] && echo "#不需要恢復還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安" >"$script_path/應用列表.txt"
 #開始循環$txt內的資料進行備份
 #記錄開始時間
-rm -rf "$apklist"
 starttime1="$(date -u "+%s")"
 TIME="$starttime1"
 #記錄error次數起點
@@ -268,6 +261,7 @@ while [[ $i -le $r ]]; do
 	echoRgb
 	if [[ $i = $r ]]; then
 		endtime 1 "應用備份"
+		echoRgb "備份路徑:$Backup" "2"
 		if [[ $backup_media = true ]]; then
 			echoRgb "備份結束，備份多媒體"
 			starttime1="$(date -u "+%s")"
@@ -288,14 +282,14 @@ while [[ $i -le $r ]]; do
 		if [[ $recovery_backup = true ]]; then
 			if [[ -f $tools_path/META-INF/com/google/android/update-binary ]]; then
 				echoRgb "輸出用於recovery的備份卡刷包"
-				rm -rf "$MODDIR/recovery卡刷備份.zip"
-				mkdir -p "$MODDIR/tmp"
+				rm -rf "$MODDIR/recovery卡刷備份.zip" ; mkdir -p "$MODDIR/tmp"
 				tar -cpf - -C "$tools_path" "META-INF" "script" "bin" "apk" | tar --delete "script/restore3" --delete "bin/busybox_path" --delete "bin/lz4" --delete "bin/zip" | pv | tar --recursive-unlink -xmpf - -C "$MODDIR/tmp"
-				cd "$MODDIR/tmp"
-				zip -r "recovery卡刷備份.zip" *
-				mv "$MODDIR/tmp/recovery卡刷備份.zip" "$MODDIR"
-				rm -rf "$MODDIR/tmp" "$script_path/應用列表.txt"
-				echoRgb "輸出:$MODDIR/recovery卡刷備份.zip"
+				(cd "$MODDIR/tmp" && zip -r "recovery卡刷備份.zip" *)
+				echo_log "打包卡刷包"
+				if [[ $result = 0 ]]; then
+					mv "$MODDIR/tmp/recovery卡刷備份.zip" "$MODDIR" && rm -rf "$MODDIR/tmp" "$script_path/應用列表.txt"
+					echoRgb "輸出:$MODDIR/recovery卡刷備份.zip" "2"
+				fi
 			fi
 		fi
 	fi
@@ -328,4 +322,4 @@ exit 0
 }&
 wait
 longToast "批量備份完成"
-Print "批量備份完成 執行過程請查看$Status_log" && rm -rf "$apklist"
+Print "批量備份完成 執行過程請查看$Status_log"

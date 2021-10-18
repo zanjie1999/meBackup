@@ -102,10 +102,11 @@ while [[ $i -le $r ]]; do
 		if [[ $(pm path "$name") = "" ]]; then
 			apkfile="$(find "$Backup_folder" -maxdepth 1 -name "apk.*" -type f 2>/dev/null)"
 			if [[ $apkfile != "" ]]; then
+				rm -rf "$TMPDIR"/*
 				case ${apkfile##*.} in
-				lz4) pv "$apkfile" | tar --recursive-unlink -I lz4 -xmpf - -C "$TMPDIR" ;;
-				zst) pv "$apkfile" | tar --recursive-unlink -I zstd -xmpf - -C "$TMPDIR" ;;
-				tar) pv "$apkfile" | tar --recursive-unlink -xmpf - -C "$TMPDIR" ;;
+				lz4) pv "$apkfile" | tar -I lz4 -xmpf - -C "$TMPDIR" ;;
+				zst) pv "$apkfile" | tar -I zstd -xmpf - -C "$TMPDIR"  ;;
+				tar) pv "$apkfile" | tar -xmpf - -C "$TMPDIR" ;;
 				*) (echoRgb "${apkfile##*/} 壓縮包不支持解壓縮" "0" ; Set_back)
 				esac
 				echo_log "${apkfile##*/}解壓縮" && [[ -f $Backup_folder/nmsl.apk ]] && cp -r "$Backup_folder/nmsl.apk" "$TMPDIR"

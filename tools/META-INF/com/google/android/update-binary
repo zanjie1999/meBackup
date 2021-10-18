@@ -63,7 +63,8 @@ r="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n '$=')"
 path="/data/media/0/Android"
 path2="/data/data"
 data="/data"
-apklist="$MODDIR/apklist"
+ui_print $(df -h "$data")
+ui_print $(df -h "$data" | awk 'END{print "剩餘:"$3"使用率:"$4}')
 Backup="/data/media/0/TWRP/Backup_$Compression_method"
 [[ ! -d $Backup ]] && mkdir -p "$Backup" || rm -rf "$Backup"/*
 [[ ! -f $Backup/應用列表.txt ]] && echo "#不需要恢復還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安" >"$Backup/應用列表.txt"
@@ -90,22 +91,18 @@ Backup_apk() {
 	[[ $lxj -ge 95 ]] && ui_print "$data空間不足,達到$lxj%" && exit 2
 	rm -rf "$Backup_folder"/*.apk
 	[[ $(cat "$Backup/應用列表.txt" | grep -v "#" | sed -e '/^$/d' | awk '{print $2}' | grep -w "^${name}$" | head -1) = "" ]] && echo "$name2 $name" >>"$Backup/應用列表.txt"
-	rm -rf "$apklist"
 	find "$apk_path" -maxdepth 1 -name "*.apk" -type f | while read; do
 		path="$REPLY"
 		b_size="$(ls -l "$path" | awk '{print $5}')"
 		k_size="$(awk 'BEGIN{printf "%.2f\n", "'$b_size'"/'1024'}')"
 		m_size="$(awk 'BEGIN{printf "%.2f\n", "'$k_size'"/'1024'}')"
-		ui_print "${path##*/} ${m_size}MB(${k_size}KB)" ; echo "${path##*/}">>"$apklist"
+		ui_print "${path##*/} ${m_size}MB(${k_size}KB)"
 	done
-	if [[ $? = 0 && -f $apklist ]]; then
-		case $Compression_method in
-			tar|TAR|Tar) tar -C "$apk_path" -cf "$Backup_folder/apk.tar" -T "$apklist" ;;
-			zstd|Zstd|ZSTD) tar -C "$apk_path" -cf - -T "$apklist" | zstd -r -T0 -6 -q >"$Backup_folder/apk.tar.zst" ;;
-		esac
-	else
-		(echoRgb "find出現錯誤或是apklist不存在" "0" ; Set_back)
-	fi
+	(cd "$apk_path"
+	case $Compression_method in
+	tar|TAR|Tar) tar -cf "$Backup_folder/apk.tar" *.apk ;;
+	zstd|Zstd|ZSTD) tar -cf - *.apk | zstd -r -T0 -6 -q >"$Backup_folder/apk.tar.zst" ;;
+	esac)
 	echo_log "備份$apk_number個Apk"
 	if [[ $result = 0 ]]; then
 		[[ $PackageName = "" ]] && echo "PackageName=\"$name\"" >>"$app_details"
@@ -124,7 +121,8 @@ Backup_apk() {
 		done
 		[[ -f $(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null) && $(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null | wc -l) = 1 ]] && cp -r "$(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null)" "$Backup_folder/nmsl.apk"
 	fi
-	unset PackageName ; D=1
+	[[ $name = bin.mt.plus && -f $apk_path/base.apk && ! -f $Backup/$name2.apk ]] && cp -r "$apk_path/base.apk" "$Backup/$name2.apk"
+	unset PackageName ChineseName ; D=1
 }
 #檢測數據位置進行備份
 Backup_data() {
@@ -184,7 +182,7 @@ while [[ $i -le $r ]]; do
 	else
 		[[ $No_backupdata != "" ]] && unset No_backupdata
 	fi
-	Backup_folder="$Backup/${name2}_${name}"
+	Backup_folder="$Backup/${name2}[${name}]"
 	app_details="$Backup_folder/app_details"
 	[[ -f $app_details ]] && . "$app_details"
 	[[ $name = "" ]] && ui_print "警告! 應用列表.txt應用包名獲取失敗，可能修改有問題" && exit 1

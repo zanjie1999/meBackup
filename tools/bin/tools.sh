@@ -41,12 +41,12 @@ abi="$(getprop ro.product.cpu.abi)"
 case $abi in
 arm64*)
 	if [[ $(getprop ro.build.version.sdk) -lt 24 ]]; then
-		echoRgb "設備Android $(getprop ro.build.version.release)版本過低 請升級至Android 8+" "0"
+		echoRgb "设备Android $(getprop ro.build.version.release)版本过低 請升級至Android 8+" "0"
 		exit 1
 	else
 		case $(getprop ro.build.version.sdk) in
 		26|27|28)
-			echoRgb "設備Android $(getprop ro.build.version.release)版本偏低，無法確定腳本能正確的使用" "0"
+			echoRgb "设备Android $(getprop ro.build.version.release)版本偏低，無法確定脚本能正確的使用" "0"
 			;;
 		esac
 	fi
@@ -185,7 +185,7 @@ isBoolean() {
 	elif [[ $1 = 0 ]]; then
 		nsx=false
 	else
-		echoRgb "$MODDIR_NAME/backup_settings.conf $2=$1填寫錯誤，正確值1or0" "0"
+		echoRgb "$MODDIR_NAME/backup_settings.conf $2=$1填寫錯誤，正确值1or0" "0"
 		exit 2
 	fi
 }
@@ -211,7 +211,7 @@ kill_Serve() {
 	process_name Zstd
 	if [[ -e $TMPDIR/scriptTMP ]]; then
 		scriptname="$(cat "$TMPDIR/scriptTMP")"
-		echoRgb "腳本殘留進程，將殺死後退出腳本，請重新執行一次\n -殺死$scriptname" "0"
+		echoRgb "脚本殘留進程，將殺死後退出脚本，請重新執行一次\n -殺死$scriptname" "0"
 		rm -rf "$TMPDIR/scriptTMP"
 		process_name "$scriptname"
 		exit
@@ -240,7 +240,7 @@ Open_apps="$(appinfo -d "(" -ed ")" -o ands,pn -ta c 2>/dev/null)"
 Open_apps2="$(echo "$Open_apps" | cut -f2 -d '(' | sed 's/)//g')"
 raminfo="$(awk '($1 == "MemTotal:"){print $2/1000"MB"}' /proc/meminfo 2>/dev/null)"
 echoRgb "---------------------SpeedBackup---------------------"
-echoRgb "腳本路徑:$MODDIR\n -已開機:$(Show_boottime)\n -busybox路徑:$(which busybox)\n -busybox版本:$(busybox | head -1 | awk '{print $2}')\n -appinfo版本:$(appinfo --version)\n -腳本版本:$backup_version\n -Magisk版本:$(magisk -c 2>/dev/null)\n -設備架構:$abi\n -品牌:$(getprop ro.product.brand 2>/dev/null)\n -設備代號:$(getprop ro.product.device 2>/dev/null)\n -型號:$(getprop ro.product.model 2>/dev/null)\n$(memory_status)\n -閃存類型:$ROM_TYPE\n -閃存顆粒:$UFS_MODEL\n -Android版本:$(getprop ro.build.version.release 2>/dev/null) SDK:$(getprop ro.build.version.sdk 2>/dev/null)\n -終端:$Open_apps\n -By@YAWAsau\n -Support: https://jq.qq.com/?_wv=1027&k=f5clPNC3"
+echoRgb "脚本路徑:$MODDIR\n -已開機:$(Show_boottime)\n -busybox路徑:$(which busybox)\n -busybox版本:$(busybox | head -1 | awk '{print $2}')\n -appinfo版本:$(appinfo --version)\n -脚本版本:$backup_version\n -Magisk版本:$(magisk -c 2>/dev/null)\n -设备架構:$abi\n -品牌:$(getprop ro.product.brand 2>/dev/null)\n -设备代號:$(getprop ro.product.device 2>/dev/null)\n -型號:$(getprop ro.product.model 2>/dev/null)\n$(memory_status)\n -閃存類型:$ROM_TYPE\n -閃存顆粒:$UFS_MODEL\n -Android版本:$(getprop ro.build.version.release 2>/dev/null) SDK:$(getprop ro.build.version.sdk 2>/dev/null)\n -終端:$Open_apps\n -By@YAWAsau\n -Support: https://jq.qq.com/?_wv=1027&k=f5clPNC3"
 update_script() {
 	[[ $zipFile = "" ]] && zipFile="$(find "$MODDIR" -maxdepth 1 -name "*.zip" -type f 2>/dev/null)"
 	if [[ $zipFile != "" ]]; then
@@ -261,12 +261,12 @@ update_script() {
 						*Backup_*)
 							if [[ -f $MODDIR/app_details ]]; then
 								mv "$MODDIR/tools" "${MODDIR%/*}"
-								echoRgb "更新當前${MODDIR##*/}目錄下恢復相關腳本+外部tools目錄與腳本"
+								echoRgb "更新當前${MODDIR##*/}目錄下恢復相關脚本+外部tools目錄與脚本"
 								cp -r "$tools_path/script/Get_DirName" "${MODDIR%/*}/重新生成應用列表.sh"
 								cp -r "$tools_path/script/convert" "${MODDIR%/*}/轉換資料夾名稱.sh"
 								cp -r "$tools_path/script/check_file" "${MODDIR%/*}/壓縮檔完整性檢查.sh"
 								cp -r "$tools_path/script/restore" "${MODDIR%/*}/恢復備份.sh"
-								cp -r "$MODDIR/終止腳本.sh" "${MODDIR%/*}/終止腳本.sh"
+								cp -r "$MODDIR/停止脚本.sh" "${MODDIR%/*}/停止脚本.sh"
 								[[ -d ${MODDIR%/*}/Media ]] && cp -r "$tools_path/script/restore3" "${MODDIR%/*}/恢復自定義資料夾.sh"
 								find "${MODDIR%/*}" -maxdepth 1 -type d | sort | while read; do
 									if [[ -f $REPLY/app_details ]]; then
@@ -284,15 +284,15 @@ update_script() {
 									fi
 								done
 								if [[ -d ${MODDIR%/*/*}/tools && -f ${MODDIR%/*/*}/備份應用.sh ]]; then
-									echoRgb "更新${MODDIR%/*/*}/tools與備份相關腳本"
+									echoRgb "更新${MODDIR%/*/*}/tools與備份相關脚本"
 									rm -rf "${MODDIR%/*/*}/tools"
 									find "${MODDIR%/*/*}" -maxdepth 1 -name "*.sh" -type f -exec rm -rf {} \;
-									mv "$MODDIR/備份應用.sh" "$MODDIR/生成應用列表.sh" "$MODDIR/備份自定義資料夾.sh" "$MODDIR/終止腳本.sh" "${MODDIR%/*/*}"
+									mv "$MODDIR/備份應用.sh" "$MODDIR/生成應用列表.sh" "$MODDIR/備份自定義資料夾.sh" "$MODDIR/停止脚本.sh" "${MODDIR%/*/*}"
 									cp -r "$tools_path" "${MODDIR%/*/*}"
 								fi
-								rm -rf "$MODDIR/終止腳本.sh"
+								rm -rf "$MODDIR/停止脚本.sh"
 							else
-								echoRgb "更新當前${MODDIR##*/}目錄下恢復相關腳本+tools目錄"
+								echoRgb "更新當前${MODDIR##*/}目錄下恢復相關脚本+tools目錄"
 								cp -r "$tools_path/script/Get_DirName" "$MODDIR/重新生成應用列表.sh"
 								cp -r "$tools_path/script/convert" "$MODDIR/轉換資料夾名稱.sh"
 								cp -r "$tools_path/script/check_file" "$MODDIR/壓縮檔完整性檢查.sh"
@@ -314,10 +314,10 @@ update_script() {
 									fi
 								done
 								if [[ -d ${MODDIR%/*}/tools && -f ${MODDIR%/*}/備份應用.sh ]]; then
-									echoRgb "更新${MODDIR%/*}/tools與備份相關腳本"
+									echoRgb "更新${MODDIR%/*}/tools與備份相關脚本"
 									rm -rf "${MODDIR%/*}/tools"
 									find "${MODDIR%/*}" -maxdepth 1 -name "*.sh" -type f -exec rm -rf {} \;
-									cp -r "$MODDIR/備份應用.sh" "$MODDIR/終止腳本.sh" "$MODDIR/生成應用列表.sh" "$MODDIR/備份自定義資料夾.sh" "${MODDIR%/*}"
+									cp -r "$MODDIR/備份應用.sh" "$MODDIR/停止脚本.sh" "$MODDIR/生成應用列表.sh" "$MODDIR/備份自定義資料夾.sh" "${MODDIR%/*}"
 									cp -r "$tools_path" "${MODDIR%/*}"
 								fi
 							fi
@@ -327,14 +327,14 @@ update_script() {
 							if [[ $(find "$MODDIR" -maxdepth 1 -name "Backup_*" -type d) != "" ]]; then
 								find "$MODDIR" -maxdepth 1 -name "Backup_*" -type d | while read backup_path; do
 									if [[ -d $backup_path && $backup_path != $MODDIR ]]; then
-										echoRgb "更新當前目錄下備份相關腳本&tools目錄+${backup_path##*/}內tools目錄+恢復腳本+tools"
+										echoRgb "更新當前目錄下備份相關脚本&tools目錄+${backup_path##*/}內tools目錄+恢復脚本+tools"
 										rm -rf "$backup_path/tools"
 										cp -r "$tools_path" "$backup_path" && rm -rf "$backup_path/tools/bin/zip" "$backup_path/tools/script"
 										cp -r "$tools_path/script/restore" "$backup_path/恢復備份.sh"
 										cp -r "$tools_path/script/Get_DirName" "$backup_path/重新生成應用列表.sh"
 										cp -r "$tools_path/script/convert" "$backup_path/轉換資料夾名稱.sh"
 										cp -r "$tools_path/script/check_file" "$backup_path/壓縮檔完整性檢查.sh"
-										cp -r "$MODDIR/終止腳本.sh" "$backup_path/終止腳本.sh"
+										cp -r "$MODDIR/停止脚本.sh" "$backup_path/停止脚本.sh"
 										[[ -d $backup_path/Media ]] && cp -r "$tools_path/script/restore3" "$backup_path/恢復自定義資料夾.sh"
 										find "$MODDIR" -maxdepth 2 -type d | sort | while read; do
 											if [[ -f $REPLY/app_details ]]; then
@@ -354,7 +354,7 @@ update_script() {
 									fi
 								done
 							else
-								echoRgb "更新當前${MODDIR##*/}目錄下備份相關腳本+tools目錄"
+								echoRgb "更新當前${MODDIR##*/}目錄下備份相關脚本+tools目錄"
 							fi
 							;;
 						esac
@@ -363,7 +363,7 @@ update_script() {
 					fi
 					rm -rf "$TMPDIR"/*
 					rm -rf "$zipFile"
-					echoRgb "更新完成 請重新執行腳本" "2"
+					echoRgb "更新完成 請重新執行脚本" "2"
 					exit
 				else
 					echoRgb "${zipFile##*/}版本低於當前版本,自動刪除" "0"
@@ -430,7 +430,7 @@ esac
 cdn=2
 #settings get system system_locales
 LANG="$(getprop "persist.sys.locale")"
-echoRgb "檢查更新中 請稍後......."
+echoRgb "檢查更新中 请稍后......."
 Language="https://api.github.com/repos/Petit-Abba/backup_script_zh-CN/releases/latest"
 if [[ $LANG != "" ]]; then
 	case $LANG in
@@ -448,7 +448,7 @@ if [[ $LANG != "" ]]; then
 else
 	echoRgb "獲取系統語系失敗 默認簡體中文" "0"
 fi
-dns="8.8.8.8"
+dns="223.6.6.6"
 [[ $(getprop ro.build.version.sdk) -lt 23 ]] && alias curl="curl -kL --dns-servers $dns$flag" || alias curl="curl -L --dns-servers $dns$flag"
 #效驗選填是否正確
 Lo="$(echo "$Lo" | sed 's/true/1/g ; s/false/0/g')"
@@ -457,7 +457,7 @@ if [[ $Lo = false ]]; then
 	isBoolean "$update" "update" && update="$nsx"
 	isBoolean "$update_behavior" "update_behavior" && update_behavior="$nsx"
 else
-	echoRgb "自動更新腳本?\n -音量上更新，下不更新"
+	echoRgb "自動更新脚本?\n -音量上更新，下不更新"
 	get_version "更新" "不更新" && update="$branch"
 fi
 if [[ $update = true ]]; then
@@ -504,7 +504,7 @@ if [[ $json != "" ]]; then
 				echoRgb "發現新版本:$tag"
 				if [[ $update = true ]]; then
 					echo "$json" | sed 's/\"body\": \"/body=\"/g'>"$TMPDIR/updateinfo" && . "$TMPDIR/updateinfo" &>/dev/null ; [[ $body != "" ]] && echoRgb "更新日誌:\n$body" && rm -rf "$TMPDIR/updateinfo"
-					echoRgb "是否更新腳本？\n -音量上更新，音量下不更新" "2"
+					echoRgb "是否更新脚本？\n -音量上更新，音量下不更新" "2"
 					get_version "更新" "不更新" && choose="$branch"
 					if [[ $choose = true ]]; then
 						if [[ $Lo = true ]]; then
@@ -515,7 +515,7 @@ if [[ $json != "" ]]; then
 							am start -a android.intent.action.VIEW -d "$zip_url" 2>/dev/null
 							echo_log "跳轉瀏覽器"
 							if [[ $result = 0 ]]; then
-								echoRgb "等待下載中.....請儘速點擊下載 否則腳本將等待15秒後自動退出"
+								echoRgb "等待下載中.....請儘速點擊下載 否則脚本將等待15秒後自動退出"
 								zipFile="$(ls -t /storage/emulated/0/Download/*.zip 2>/dev/null | head -1)"
 								seconds=1
 								while [[ $(unzip -l "$zipFile" 2>/dev/null | awk '{print $4}' | egrep -wo "^backup_settings.conf$") = "" ]]; do
@@ -527,7 +527,7 @@ if [[ $json != "" ]]; then
 								update_script
 							fi
 						else
-							echoRgb "更新腳本步驟如下\n -1.將剪貼簿內的連結用瀏覽器下載\n -2.將zip壓縮包完整不解壓縮放在$MODDIR\n -3.在$MODDIR目錄隨便執行一個腳本\n -4.假設沒有提示錯誤重新進入腳本如版本號發生變化則更新成功" "2"
+							echoRgb "更新脚本步驟如下\n -1.將剪貼簿內的連結用瀏覽器下載\n -2.將zip壓縮包完整不解壓縮放在$MODDIR\n -3.在$MODDIR目錄隨便執行一個脚本\n -4.假設沒有提示錯誤重新進入脚本如版本號發生變化則更新成功" "2"
 							starttime1="$(date -u "+%s")"
 							xtext "$zip_url" 
 							echo_log "複製連結到剪裁版"
@@ -910,7 +910,7 @@ installapk() {
 		esac
 		echo_log "${apkfile##*/}解壓縮" && [[ -f $Backup_folder/nmsl.apk ]] && cp -r "$Backup_folder/nmsl.apk" "$TMPDIR"
 	else
-		echoRgb "你的Apk壓縮包離家出走了，可能備份後移動過程遺失了\n -解決辦法手動安裝Apk後再執行恢復腳本" "0"
+		echoRgb "你的Apk壓縮包離家出走了，可能備份後移動過程遺失了\n -解決辦法手動安裝Apk後再執行恢復脚本" "0"
 	fi
 	if [[ $result = 0 ]]; then
 		case $(find "$TMPDIR" -maxdepth 1 -name "*.apk" -type f 2>/dev/null | wc -l) in
@@ -950,7 +950,7 @@ disable_verify() {
 	if [[ $(settings get global package_verifier_user_consent 2>/dev/null) != -1 ]]; then
 		settings put global package_verifier_user_consent -1 2>/dev/null
 		settings put global upload_apk_enable 0 2>/dev/null
-		echoRgb "PLAY安全驗證為開啟狀態已被腳本關閉防止apk安裝失敗" "3"
+		echoRgb "PLAY安全驗證為開啟狀態已被脚本關閉防止apk安裝失敗" "3"
 	fi
 }
 get_name(){
@@ -1060,7 +1060,7 @@ case $operate in
 backup)
 	kill_Serve
 	self_test
-	[[ ! -d $script_path ]] && echo "$script_path腳本目錄遺失" && exit 2
+	[[ ! -d $script_path ]] && echo "$script_path脚本目錄遺失" && exit 2
 	case $MODDIR in
 	/storage/emulated/0/Android/* | /data/media/0/Android/* | /sdcard/Android/*) echoRgb "請勿在$MODDIR內備份" "0" && exit 2 ;;
 	esac
@@ -1099,7 +1099,7 @@ backup)
 	sort -u "$txt" -o "$txt" 2>/dev/null
 	data="$MODDIR"
 	hx="本地"
-	echoRgb "提示 腳本支持後台壓縮 可以直接離開腳本\n -或是關閉終端也能備份 如需終止腳本\n -請執行終止腳本.sh即可停止\n -備份結束將發送toast提示語" "3"
+	echoRgb "提示 脚本支持後台壓縮 可以直接離開脚本\n -或是關閉終端也能備份 如需停止脚本\n -請執行停止脚本.sh即可停止\n -備份結束將發送toast提示語" "3"
 	backup_path
 	echoRgb "配置詳細:\n -壓縮方式:$Compression_method\n -音量鍵確認:$Lo\n -Toast:$toast_info\n -更新:$update\n -已卸載應用檢查:$delete_folder\n -卸載應用默認操作(true刪除false移動):$default_behavior\n -默認使用usb:$USBdefault\n -備份外部數據:$Backup_obb_data\n -備份user數據:$Backup_user_data\n -自定義目錄備份:$backup_media"
 	D="1"
@@ -1126,8 +1126,8 @@ backup)
 								[[ ! -f $Backup/被卸載的應用/重新生成應用列表.sh ]] && cp -r "$script_path/Get_DirName" "$Backup/被卸載的應用/重新生成應用列表.sh"
 								[[ ! -f $Backup/被卸載的應用/轉換資料夾名稱.sh ]] && cp -r "$script_path/convert" "$Backup/被卸載的應用/轉換資料夾名稱.sh"
 								[[ ! -f $Backup/被卸載的應用/壓縮檔完整性檢查.sh ]] && cp -r "$script_path/check_file" "$Backup/被卸載的應用/壓縮檔完整性檢查.sh"
-								[[ ! -f $Backup/被卸載的應用/終止腳本.sh ]] && cp -r "$MODDIR/終止腳本.sh" "$Backup/被卸載的應用/終止腳本.sh"
-								[[ ! -f $Backup/被卸載的應用/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢復腳本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#備份與恢復遭遇異常或是結束後發送通知(toast與狀態欄提示)\ntoast_info=$toast_info\n\n#腳本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior\n#主色\nrgb_a=$rgb_a\n#輔色\nrgb_b=$rgb_b\nrgb_c=$rgb_c">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/被卸載的應用/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/被卸載的應用/backup_settings.conf"
+								[[ ! -f $Backup/被卸載的應用/停止脚本.sh ]] && cp -r "$MODDIR/停止脚本.sh" "$Backup/被卸載的應用/停止脚本.sh"
+								[[ ! -f $Backup/被卸載的應用/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢復脚本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#備份與恢復遭遇異常或是結束後發送通知(toast與狀態欄提示)\ntoast_info=$toast_info\n\n#脚本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior\n#主色\nrgb_a=$rgb_a\n#輔色\nrgb_b=$rgb_b\nrgb_c=$rgb_c">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/被卸載的應用/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/被卸載的應用/backup_settings.conf"
 								txt2="$Backup/被卸載的應用/appList.txt"
 								[[ ! -f $txt2 ]] && echo "#不需要恢復還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安">"$txt2"
 								echo "${REPLY##*/} $PackageName">>"$txt2"
@@ -1164,12 +1164,12 @@ backup)
 	[[ ! -f $txt2 ]] && echo "#不需要恢復還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安">"$txt2"
 	[[ ! -d $Backup/tools ]] && cp -r "$tools_path" "$Backup" && rm -rf "$Backup/tools/bin/zip" "$Backup/tools/script"
 	[[ ! -f $Backup/恢復備份.sh ]] && cp -r "$script_path/restore" "$Backup/恢復備份.sh"
-	[[ ! -f $Backup/終止腳本.sh ]] && cp -r "$MODDIR/終止腳本.sh" "$Backup/終止腳本.sh"
+	[[ ! -f $Backup/停止脚本.sh ]] && cp -r "$MODDIR/停止脚本.sh" "$Backup/停止脚本.sh"
 	[[ ! -f $Backup/重新生成應用列表.sh ]] && cp -r "$script_path/Get_DirName" "$Backup/重新生成應用列表.sh"
 	[[ ! -f $Backup/轉換資料夾名稱.sh ]] && cp -r "$script_path/convert" "$Backup/轉換資料夾名稱.sh"
 	[[ ! -f $Backup/壓縮檔完整性檢查.sh ]] && cp -r "$script_path/check_file" "$Backup/壓縮檔完整性檢查.sh"
 	[[ -d $Backup/Media ]] && cp -r "$script_path/restore3" "$Backup/恢復自定義資料夾.sh"
-	[[ ! -f $Backup/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢復腳本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#備份與恢復遭遇異常或是結束後發送通知(toast與狀態欄提示)\ntoast_info=$toast_info\n\n#使用者\nuser=\n\n#腳本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior\n\n#恢復模式(1僅恢復未安裝應用0全恢復)\nrecovery_mode=0\n\n#主色\nrgb_a=$rgb_a\n#輔色\nrgb_b=$rgb_b\nrgb_c=$rgb_c">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/backup_settings.conf"
+	[[ ! -f $Backup/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢復脚本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#備份與恢復遭遇異常或是結束後發送通知(toast與狀態欄提示)\ntoast_info=$toast_info\n\n#使用者\nuser=\n\n#脚本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior\n\n#恢復模式(1僅恢復未安裝應用0全恢復)\nrecovery_mode=0\n\n#主色\nrgb_a=$rgb_a\n#輔色\nrgb_b=$rgb_b\nrgb_c=$rgb_c">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/backup_settings.conf"
 	filesha256="$(sha256sum "$bin_path/tools.sh" | cut -d" " -f1)"
 	filesha256_1="$(sha256sum "$Backup/tools/bin/tools.sh" | cut -d" " -f1)"
 	[[ $filesha256 != $filesha256_1 ]] && cp -r "$bin_path/tools.sh" "$Backup/tools/bin/tools.sh"
@@ -1355,10 +1355,10 @@ check_file)
 Restore)
 	kill_Serve
 	self_test
-	echoRgb "假設反悔了要終止腳本請儘速離開此腳本點擊$MODDIR_NAME/終止腳本.sh\n -否則腳本將繼續執行直到結束" "0"
+	echoRgb "假設反悔了要停止脚本請儘速離開此脚本點擊$MODDIR_NAME/停止脚本.sh\n -否則脚本將繼續執行直到結束" "0"
 	echoRgb "如果大量提示找不到資料夾請執行$MODDIR_NAME/轉換資料夾名稱.sh"
 	disable_verify
-	[[ ! -d $path2 ]] && echoRgb "設備不存在user目錄" "0" && exit 1
+	[[ ! -d $path2 ]] && echoRgb "设备不存在user目錄" "0" && exit 1
 	i=1
 	txt="$MODDIR/appList.txt"
 	[[ ! -f $txt ]] && echoRgb "請執行\"重新生成應用列表.sh\"獲取應用列表再來恢復" "0" && exit 2
@@ -1391,7 +1391,7 @@ Restore)
 			echoRgb "獲取完成 預計安裝$r個應用"
 			txt="$TXT"
 		else
-			echoRgb "獲取完成 但備份內應用都已安裝....正在退出腳本" "0" && exit 0
+			echoRgb "獲取完成 但備份內應用都已安裝....正在退出脚本" "0" && exit 0
 		fi
 	fi
 	[[ $(which restorecon) = "" ]] && echoRgb "restorecon命令不存在" "0" && exit 1
@@ -1486,7 +1486,7 @@ Restore2)
 	kill_Serve
 	self_test
 	disable_verify
-	[[ ! -d $path2 ]] && echoRgb "設備不存在user目錄" "0" && exit 1
+	[[ ! -d $path2 ]] && echoRgb "设备不存在user目錄" "0" && exit 1
 	[[ $(which restorecon) = "" ]] && echoRgb "restorecon命令不存在" "0" && exit 1
 	#記錄開始時間
 	starttime1="$(date -u "+%s")"
@@ -1534,9 +1534,9 @@ Restore2)
 Restore3)
 	kill_Serve
 	self_test
-	echoRgb "點錯了?這是恢復自定義資料夾腳本 如果你是要恢復應用那你就點錯了\n -音量上繼續恢復自定義資料夾，音量下離開腳本" "2"
-	echoRgb "假設反悔了要終止腳本請儘速離開此腳本點擊終止腳本.sh,否則腳本將繼續執行直到結束" "0"
-	get_version "恢復自定義資料夾" "離開腳本" && [[ "$branch" = false ]] && exit 0
+	echoRgb "點錯了?這是恢復自定義資料夾脚本 如果你是要恢復應用那你就點錯了\n -音量上繼續恢復自定義資料夾，音量下離開脚本" "2"
+	echoRgb "假設反悔了要停止脚本請儘速離開此脚本點擊停止脚本.sh,否則脚本將繼續執行直到結束" "0"
+	get_version "恢復自定義資料夾" "離開脚本" && [[ "$branch" = false ]] && exit 0
 	mediaDir="$MODDIR/Media"
 	[[ -f "$mediaDir/app_details" ]] && app_details="$mediaDir/app_details" &>/dev/null
 	Backup_folder2="$mediaDir"
@@ -1581,7 +1581,7 @@ Getlist)
 	[[ $debug_list = true ]] && txtpath="${txtpath/'/storage/emulated/'/'/data/media/'}"
 	nametxt="$txtpath/appList.txt"
 	[[ ! -e $nametxt ]] && echo '#不需要備份的應用請在開頭注釋# 比如#酷安 xxxxxxxx\n#不需要備份數據比如!酷安 xxxxxxxx應用名前方方加一個驚嘆號即可 注意是應用名不是包名' >"$nametxt"
-	echoRgb "請勿關閉腳本，等待提示結束"
+	echoRgb "請勿關閉脚本，等待提示結束"
 	rgb_a=118
 	rm -rf "$MODDIR/tmp"
 	starttime1="$(date -u "+%s")"
@@ -1629,7 +1629,7 @@ Getlist)
 		if [[ $LR = $Apk_Quantity ]]; then
 			if [[ $(cat "$nametxt" | wc -l | awk '{print $1-2}') -lt $i ]]; then
 				rm -rf "$nametxt" "$MODDIR/tmp"
-				echoRgb "\n -輸出異常 請將$MODDIR_NAME/backup_settings.conf中的debug_list=\"0\"改為1或是重新執行本腳本" "0"
+				echoRgb "\n -輸出異常 請將$MODDIR_NAME/backup_settings.conf中的debug_list=\"0\"改為1或是重新執行本脚本" "0"
 				exit
 			fi
 			[[ -e $MODDIR/tmp ]] && echoRgb "\n -第三方apk數量=\"$Apk_Quantity\"\n -已過濾=\"$rc\"\n -xposed=\"$rd\"\n -存在列表中=\"$Q\"\n -輸出=\"$i\""
@@ -1661,7 +1661,7 @@ backup_media)
 	kill_Serve
 	self_test
 	backup_path
-	echoRgb "假設反悔了要終止腳本請儘速離開此腳本點擊終止腳本.sh,否則腳本將繼續執行直到結束" "0"
+	echoRgb "假設反悔了要停止脚本請儘速離開此脚本點擊停止脚本.sh,否則脚本將繼續執行直到結束" "0"
 	A=1
 	B="$(echo "$Custom_path" | grep -v "#" | sed -e '/^$/d' | sed -n '$=')"
 	if [[ $B != "" ]]; then
@@ -1673,7 +1673,7 @@ backup_media)
 		[[ ! -f $Backup/轉換資料夾名稱.sh ]] && cp -r "$script_path/convert" "$Backup/轉換資料夾名稱.sh"
 		[[ ! -f $Backup/壓縮檔完整性檢查.sh ]] && cp -r "$script_path/check_file" "$Backup/壓縮檔完整性檢查.sh"
 		[[ ! -d $Backup/tools ]] && cp -r "$tools_path" "$Backup" && rm -rf "$Backup/tools/bin/zip" "$Backup/tools/script"
-		[[ ! -f $Backup/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢復腳本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#備份與恢復遭遇異常或是結束後發送通知(toast與狀態欄提示)\ntoast_info=$toast_info\n\n#腳本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/backup_settings.conf"
+		[[ ! -f $Backup/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢復脚本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#備份與恢復遭遇異常或是結束後發送通知(toast與狀態欄提示)\ntoast_info=$toast_info\n\n#脚本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/backup_settings.conf"
 		app_details="$Backup_folder/app_details"
 		filesize="$(du -ks "$Backup_folder" | awk '{print $1}')"
 		[[ -f $app_details ]] && . "$app_details" &>/dev/null || touch "$app_details"

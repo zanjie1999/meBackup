@@ -5,16 +5,16 @@ tools_path="$MODDIR/tools"
 script="${0##*/}"
 if [[ ! -d $tools_path ]]; then
 	tools_path="${MODDIR%/*}/tools"
-	[[ ! -d $tools_path ]] && echo "$tools_path二進制目錄遺失" && EXIT="true"
+	[[ ! -d $tools_path ]] && echo "$tools_path二进制目录丢失" && EXIT="true"
 fi
 bin_path="$tools_path/bin"
 script_path="$tools_path/script"
 if [[ ! -d $bin_path ]]; then
 	bin_path="${MODDIR%/*}/tools/bin"
-	[[ ! -d $bin_path ]] && echo "$bin_path關鍵目錄遺失" && EXIT="true"
+	[[ ! -d $bin_path ]] && echo "$bin_path关键目录丢失" && EXIT="true"
 fi
 [[ $conf_path != "" ]] && conf_path="$conf_path" || conf_path="$MODDIR/backup_settings.conf"
-[[ ! -f $conf_path ]] && echo "$conf_path配置遺失" && EXIT="true"
+[[ ! -f $conf_path ]] && echo "$conf_path配置丢失" && EXIT="true"
 [[ $EXIT = true ]] && exit 1
 echo "$(sed 's/true/1/g ; s/false/0/g' "$conf_path")">"$conf_path"
 . "$conf_path" &>/dev/null
@@ -41,12 +41,12 @@ abi="$(getprop ro.product.cpu.abi)"
 case $abi in
 arm64*)
 	if [[ $(getprop ro.build.version.sdk) -lt 24 ]]; then
-		echoRgb "设备Android $(getprop ro.build.version.release)版本过低 請升級至Android 8+" "0"
+		echoRgb "设备Android $(getprop ro.build.version.release)版本过低 请升级至Android 8+" "0"
 		exit 1
 	else
 		case $(getprop ro.build.version.sdk) in
 		26|27|28)
-			echoRgb "设备Android $(getprop ro.build.version.release)版本偏低，無法確定脚本能正確的使用" "0"
+			echoRgb "设备Android $(getprop ro.build.version.release)版本偏低，无法確定脚本能正確的使用" "0"
 			;;
 		esac
 	fi
@@ -85,7 +85,7 @@ if [[ $filepath != $(cat "$bin_path/busybox_path") ]]; then
 	[[ -d $(cat "$bin_path/busybox_path") ]] && rm -rf "$(cat "$bin_path/busybox_path")"
 	echoRgb "$filepath" >"$bin_path/busybox_path"
 fi
-#刪除無效軟連結
+#刪除无效軟連結
 find -L "$filepath" -maxdepth 1 -type l -exec rm -rf {} \;
 if [[ -f $busybox && -f $busybox2 ]]; then
 	filesha256="$(sha256sum "$busybox" | cut -d" " -f1)"
@@ -261,7 +261,7 @@ update_script() {
 						*Backup_*)
 							if [[ -f $MODDIR/app_details ]]; then
 								mv "$MODDIR/tools" "${MODDIR%/*}"
-								echoRgb "更新當前${MODDIR##*/}目錄下恢復相關脚本+外部tools目錄與脚本"
+								echoRgb "更新當前${MODDIR##*/}目录下恢復相關脚本+外部tools目录與脚本"
 								cp -r "$tools_path/script/Get_DirName" "${MODDIR%/*}/重新生成應用列表.sh"
 								cp -r "$tools_path/script/convert" "${MODDIR%/*}/轉換資料夾名稱.sh"
 								cp -r "$tools_path/script/check_file" "${MODDIR%/*}/壓縮檔完整性檢查.sh"
@@ -292,7 +292,7 @@ update_script() {
 								fi
 								rm -rf "$MODDIR/停止脚本.sh"
 							else
-								echoRgb "更新當前${MODDIR##*/}目錄下恢復相關脚本+tools目錄"
+								echoRgb "更新當前${MODDIR##*/}目录下恢復相關脚本+tools目录"
 								cp -r "$tools_path/script/Get_DirName" "$MODDIR/重新生成應用列表.sh"
 								cp -r "$tools_path/script/convert" "$MODDIR/轉換資料夾名稱.sh"
 								cp -r "$tools_path/script/check_file" "$MODDIR/壓縮檔完整性檢查.sh"
@@ -327,7 +327,7 @@ update_script() {
 							if [[ $(find "$MODDIR" -maxdepth 1 -name "Backup_*" -type d) != "" ]]; then
 								find "$MODDIR" -maxdepth 1 -name "Backup_*" -type d | while read backup_path; do
 									if [[ -d $backup_path && $backup_path != $MODDIR ]]; then
-										echoRgb "更新當前目錄下備份相關脚本&tools目錄+${backup_path##*/}內tools目錄+恢復脚本+tools"
+										echoRgb "更新當前目录下備份相關脚本&tools目录+${backup_path##*/}內tools目录+恢復脚本+tools"
 										rm -rf "$backup_path/tools"
 										cp -r "$tools_path" "$backup_path" && rm -rf "$backup_path/tools/bin/zip" "$backup_path/tools/script"
 										cp -r "$tools_path/script/restore" "$backup_path/恢復備份.sh"
@@ -354,7 +354,7 @@ update_script() {
 									fi
 								done
 							else
-								echoRgb "更新當前${MODDIR##*/}目錄下備份相關脚本+tools目錄"
+								echoRgb "更新當前${MODDIR##*/}目录下備份相關脚本+tools目录"
 							fi
 							;;
 						esac
@@ -372,7 +372,7 @@ update_script() {
 			fi
 			;;
 		*)
-			echoRgb "錯誤 請刪除當前目錄多餘zip\n -保留一個最新的數據備份.zip\n -下列為當前目錄zip\n$zipFile" "0"
+			echoRgb "錯誤 請刪除當前目录多餘zip\n -保留一個最新的數據備份.zip\n -下列為當前目录zip\n$zipFile" "0"
 			exit 1
 			;;
 		esac
@@ -418,7 +418,7 @@ backup|Restore|Restore2|Getlist)
 					cp -r "${bin_path%/*}/apk"/*.apk "$TMPDIR" && INSTALL "$TMPDIR"/*.apk && rm -rf "$TMPDIR"/*
 					[[ $? = 0 ]] && echoRgb "安裝toast成功" "1" || echoRgb "安裝toast失敗" "0"
 				else
-					echo "$tools_path/apk目錄遺失"
+					echo "$tools_path/apk目录丢失"
 				fi
 			fi
 		else
@@ -429,162 +429,165 @@ backup|Restore|Restore2|Getlist)
 esac
 cdn=2
 #settings get system system_locales
-LANG="$(getprop "persist.sys.locale")"
-echoRgb "檢查更新中 请稍后......."
-Language="https://api.github.com/repos/Petit-Abba/backup_script_zh-CN/releases/latest"
-if [[ $LANG != "" ]]; then
-	case $LANG in
-	*-TW | *-tw)
-		echoRgb "系統語系:繁體中文"
-		Language="https://api.github.com/repos/YAWAsau/backup_script/releases/latest"
-		;;
-	*-CN | *-cn)
-		echoRgb "系統語系:簡體中文"
-		;;
-	*)
-		echoRgb "$LANG不支持 默認簡體中文" "0"
-		;;
-	esac
-else
-	echoRgb "獲取系統語系失敗 默認簡體中文" "0"
-fi
-dns="223.6.6.6"
-[[ $(getprop ro.build.version.sdk) -lt 23 ]] && alias curl="curl -kL --dns-servers $dns$flag" || alias curl="curl -L --dns-servers $dns$flag"
-#效驗選填是否正確
-Lo="$(echo "$Lo" | sed 's/true/1/g ; s/false/0/g')"
-isBoolean "$Lo" "Lo" && Lo="$nsx"
-if [[ $Lo = false ]]; then
-	isBoolean "$update" "update" && update="$nsx"
-	isBoolean "$update_behavior" "update_behavior" && update_behavior="$nsx"
-else
-	echoRgb "自動更新脚本?\n -音量上更新，下不更新"
-	get_version "更新" "不更新" && update="$branch"
-fi
-if [[ $update = true ]]; then
-	json="$(curl "$Language" 2>/dev/null)"
-	if [[ $json != "" ]]; then
-		echoRgb "使用curl"
-	else
-		json="$(down -s -L "$Language" 2>/dev/null)"
-		[[ $json != "" ]] && echoRgb "使用down"
-	fi
-	[[ $json = "" ]] && echoRgb "更新獲取失敗" "0"
-else
-	echoRgb "自動更新被關閉" "0"
-fi
-if [[ $json != "" ]]; then
-	tag="$(echo "$json" | sed -r -n 's/.*"tag_name": *"(.*)".*/\1/p')"
-	#echo "$json" | grep body|cut -f4 -d "\""
-	if [[ $tag != "" && $backup_version != $tag ]]; then
-		if [[ $(expr "$(echo "$backup_version" | tr -d "a-zA-Z")" \> "$(echo "$tag" | tr -d "a-zA-Z")") -eq 0 ]]; then
-			download="$(echo "$json" | sed -r -n 's/.*"browser_download_url": *"(.*.zip)".*/\1/p')"
-			case $cdn in
-			1)
-				zip_url="http://huge.cf/download/?huge-url=$download"
-				NJ="huge.cf"
-				;;
-			2)
-				zip_url="https://ghproxy.com/$download"
-				NJ="ghproxy.com"
-				;;
-			3)
-				zip_url="https://gh.api.99988866.xyz/$download"
-				NJ="gh.api.99988866.xyz"
-				;;
-			4)
-				zip_url="https://github.lx164.workers.dev/$download"
-				NJ="github.lx164.workers.dev"
-				;;
-			5)
-				zip_url="https://shrill-pond-3e81.hunsh.workers.dev/$download"
-				NJ="shrill-pond-3e81.hunsh.workers.dev"
-				;;
-			esac
-			if [[ $(expr "$(echo "$backup_version" | tr -d "a-zA-Z")" \> "$(echo "$download" | tr -d "a-zA-Z")") -eq 0 ]]; then
-				echoRgb "發現新版本:$tag"
-				if [[ $update = true ]]; then
-					echo "$json" | sed 's/\"body\": \"/body=\"/g'>"$TMPDIR/updateinfo" && . "$TMPDIR/updateinfo" &>/dev/null ; [[ $body != "" ]] && echoRgb "更新日誌:\n$body" && rm -rf "$TMPDIR/updateinfo"
-					echoRgb "是否更新脚本？\n -音量上更新，音量下不更新" "2"
-					get_version "更新" "不更新" && choose="$branch"
-					if [[ $choose = true ]]; then
-						if [[ $Lo = true ]]; then
-							echoRgb "更新方式\n -音量上跳轉瀏覽器，下複製"
-							get_version "跳轉" "複製" && update_behavior="$branch"
-						fi
-						if [[ $update_behavior = true ]]; then
-							am start -a android.intent.action.VIEW -d "$zip_url" 2>/dev/null
-							echo_log "跳轉瀏覽器"
-							if [[ $result = 0 ]]; then
-								echoRgb "等待下載中.....請儘速點擊下載 否則脚本將等待15秒後自動退出"
-								zipFile="$(ls -t /storage/emulated/0/Download/*.zip 2>/dev/null | head -1)"
-								seconds=1
-								while [[ $(unzip -l "$zipFile" 2>/dev/null | awk '{print $4}' | egrep -wo "^backup_settings.conf$") = "" ]]; do
-									zipFile="$(ls -t /storage/emulated/0/Download/*.zip 2>/dev/null | head -1)"
-									echoRgb "$seconds秒"
-									[[ $seconds = 15 ]] && exit 2
-									sleep 1 && let seconds++
-								done
-								update_script
-							fi
-						else
-							echoRgb "更新脚本步驟如下\n -1.將剪貼簿內的連結用瀏覽器下載\n -2.將zip壓縮包完整不解壓縮放在$MODDIR\n -3.在$MODDIR目錄隨便執行一個脚本\n -4.假設沒有提示錯誤重新進入脚本如版本號發生變化則更新成功" "2"
-							starttime1="$(date -u "+%s")"
-							xtext "$zip_url" 
-							echo_log "複製連結到剪裁版"
-							endtime 1
-						fi
-						exit 0
-					fi
-				else
-					echoRgb "$MODDIR_NAME/backup_settings.conf內update選項為0忽略更新僅提示更新" "0"
-				fi
-			fi
-		fi
-	fi
-fi
+# LANG="$(getprop "persist.sys.locale")"
+# echoRgb "檢查更新中 请稍后......."
+# Language="https://api.github.com/repos/Petit-Abba/backup_script_zh-CN/releases/latest"
+# if [[ $LANG != "" ]]; then
+# 	case $LANG in
+# 	*-TW | *-tw)
+# 		echoRgb "系統語系:繁體中文"
+# 		Language="https://api.github.com/repos/YAWAsau/backup_script/releases/latest"
+# 		;;
+# 	*-CN | *-cn)
+# 		echoRgb "系統語系:簡體中文"
+# 		;;
+# 	*)
+# 		echoRgb "$LANG不支持 默認簡體中文" "0"
+# 		;;
+# 	esac
+# else
+# 	echoRgb "獲取系統語系失敗 默認簡體中文" "0"
+# fi
+# dns="223.6.6.6"
+# [[ $(getprop ro.build.version.sdk) -lt 23 ]] && alias curl="curl -kL --dns-servers $dns$flag" || alias curl="curl -L --dns-servers $dns$flag"
+# #效驗選填是否正確
+# Lo="$(echo "$Lo" | sed 's/true/1/g ; s/false/0/g')"
+# isBoolean "$Lo" "Lo" && Lo="$nsx"
+# if [[ $Lo = false ]]; then
+# 	isBoolean "$update" "update" && update="$nsx"
+# 	isBoolean "$update_behavior" "update_behavior" && update_behavior="$nsx"
+# else
+# 	echoRgb "自動更新脚本?\n -音量上更新，下不更新"
+# 	get_version "更新" "不更新" && update="$branch"
+# fi
+# if [[ $update = true ]]; then
+# 	json="$(curl "$Language" 2>/dev/null)"
+# 	if [[ $json != "" ]]; then
+# 		echoRgb "使用curl"
+# 	else
+# 		json="$(down -s -L "$Language" 2>/dev/null)"
+# 		[[ $json != "" ]] && echoRgb "使用down"
+# 	fi
+# 	[[ $json = "" ]] && echoRgb "更新獲取失敗" "0"
+# else
+# 	echoRgb "自動更新被關閉" "0"
+# fi
+# if [[ $json != "" ]]; then
+# 	tag="$(echo "$json" | sed -r -n 's/.*"tag_name": *"(.*)".*/\1/p')"
+# 	#echo "$json" | grep body|cut -f4 -d "\""
+# 	if [[ $tag != "" && $backup_version != $tag ]]; then
+# 		if [[ $(expr "$(echo "$backup_version" | tr -d "a-zA-Z")" \> "$(echo "$tag" | tr -d "a-zA-Z")") -eq 0 ]]; then
+# 			download="$(echo "$json" | sed -r -n 's/.*"browser_download_url": *"(.*.zip)".*/\1/p')"
+# 			case $cdn in
+# 			1)
+# 				zip_url="http://huge.cf/download/?huge-url=$download"
+# 				NJ="huge.cf"
+# 				;;
+# 			2)
+# 				zip_url="https://ghproxy.com/$download"
+# 				NJ="ghproxy.com"
+# 				;;
+# 			3)
+# 				zip_url="https://gh.api.99988866.xyz/$download"
+# 				NJ="gh.api.99988866.xyz"
+# 				;;
+# 			4)
+# 				zip_url="https://github.lx164.workers.dev/$download"
+# 				NJ="github.lx164.workers.dev"
+# 				;;
+# 			5)
+# 				zip_url="https://shrill-pond-3e81.hunsh.workers.dev/$download"
+# 				NJ="shrill-pond-3e81.hunsh.workers.dev"
+# 				;;
+# 			esac
+# 			if [[ $(expr "$(echo "$backup_version" | tr -d "a-zA-Z")" \> "$(echo "$download" | tr -d "a-zA-Z")") -eq 0 ]]; then
+# 				echoRgb "發現新版本:$tag"
+# 				if [[ $update = true ]]; then
+# 					echo "$json" | sed 's/\"body\": \"/body=\"/g'>"$TMPDIR/updateinfo" && . "$TMPDIR/updateinfo" &>/dev/null ; [[ $body != "" ]] && echoRgb "更新日誌:\n$body" && rm -rf "$TMPDIR/updateinfo"
+# 					echoRgb "是否更新脚本？\n -音量上更新，音量下不更新" "2"
+# 					get_version "更新" "不更新" && choose="$branch"
+# 					if [[ $choose = true ]]; then
+# 						if [[ $Lo = true ]]; then
+# 							echoRgb "更新方式\n -音量上跳轉瀏覽器，下複製"
+# 							get_version "跳轉" "複製" && update_behavior="$branch"
+# 						fi
+# 						if [[ $update_behavior = true ]]; then
+# 							am start -a android.intent.action.VIEW -d "$zip_url" 2>/dev/null
+# 							echo_log "跳轉瀏覽器"
+# 							if [[ $result = 0 ]]; then
+# 								echoRgb "等待下載中.....請儘速點擊下載 否則脚本將等待15秒後自動退出"
+# 								zipFile="$(ls -t /storage/emulated/0/Download/*.zip 2>/dev/null | head -1)"
+# 								seconds=1
+# 								while [[ $(unzip -l "$zipFile" 2>/dev/null | awk '{print $4}' | egrep -wo "^backup_settings.conf$") = "" ]]; do
+# 									zipFile="$(ls -t /storage/emulated/0/Download/*.zip 2>/dev/null | head -1)"
+# 									echoRgb "$seconds秒"
+# 									[[ $seconds = 15 ]] && exit 2
+# 									sleep 1 && let seconds++
+# 								done
+# 								update_script
+# 							fi
+# 						else
+# 							echoRgb "更新脚本步驟如下\n -1.將剪貼簿內的連結用瀏覽器下載\n -2.將zip壓縮包完整不解壓縮放在$MODDIR\n -3.在$MODDIR目录隨便執行一個脚本\n -4.假設沒有提示錯誤重新進入脚本如版本號發生變化則更新成功" "2"
+# 							starttime1="$(date -u "+%s")"
+# 							xtext "$zip_url" 
+# 							echo_log "複製連結到剪裁版"
+# 							endtime 1
+# 						fi
+# 						exit 0
+# 					fi
+# 				else
+# 					echoRgb "$MODDIR_NAME/backup_settings.conf內update選項為0忽略更新僅提示更新" "0"
+# 				fi
+# 			fi
+# 		fi
+# 	fi
+# fi
 Lo="$(echo "$Lo" | sed 's/true/1/g ; s/false/0/g')"
 backup_path() {
-	if [[ $Output_path != "" ]]; then
-		[[ ${Output_path: -1} = / ]] && Output_path="${Output_path%?}"
-		Backup="$Output_path/Backup_${Compression_method}_$user"
-		outshow="使用自定義目錄"
-	else
-		Backup="$MODDIR/Backup_${Compression_method}_$user"
-		outshow="使用當前路徑作為備份目錄"
-	fi
-    PU="$(mount | egrep -v "rannki|0000-1" | grep -w "/mnt/media_rw" | awk '{print $3,$5}')"
-	OTGPATH="$(echo "$PU" | awk '{print $1}')"
-	OTGFormat="$(echo "$PU" | awk '{print $2}')"
-	if [[ -d $OTGPATH ]]; then
-		if [[ $(echo "$MODDIR" | egrep -o "^${OTGPATH}") != "" || $USBdefault = true ]]; then
-			hx="true"
-		else
-			echoRgb "檢測到隨身碟 是否在隨身碟備份\n -音量上是，音量下不是" "2"
-			get_version "選擇了隨身碟備份" "選擇了本地備份"
-			[[ $branch = true ]] && hx="$branch"
-		fi
-		if [[ $hx = true ]]; then
-			Backup="$OTGPATH/Backup_${Compression_method}_$user"
-			case $OTGFormat in
-			texfat | sdfat | fuseblk | exfat | NTFS | ext4 | f2fs)
-				outshow="於隨身碟備份" && hx=usb
-				;;
-			*)
-				echoRgb "隨身碟檔案系統$OTGFormat不支持超過單檔4GB\n -請格式化為exfat" "0"
-				exit 1
-				;;
-			esac
-		fi
-	else
-		echoRgb "沒有檢測到隨身碟於本地備份" "0"
-	fi
-	#分區詳細
-	if [[ $(echo "$Backup" | egrep -o "^/storage/emulated") != "" ]]; then
-		Backup_path="/data"
-	else
-		Backup_path="${Backup%/*}"
-	fi
-	echoRgb "$hx備份資料夾所使用分區統計如下↓\n -$(df -h "${Backup%/*}" | sed -n 's|% /.*|%|p' | awk '{print $(NF-3),$(NF-2),$(NF-1),$(NF)}' | awk 'END{print "總共:"$1"已用:"$2"剩餘:"$3"使用率:"$4}')檔案系統:$(df -T "$Backup_path" | sed -n 's|% /.*|%|p' | awk '{print $(NF-4)}')\n -備份目錄輸出位置↓\n -$Backup"
+	Backup="$outputPath/Backup_${Compression_method}_$user"
+	outshow="将备份到 $sshHost 的 $Backup 中"
+	# if [[ $Output_path != "" ]]; then
+	# 	[[ ${Output_path: -1} = / ]] && Output_path="${Output_path%?}"
+	# 	Backup="$Output_path/Backup_${Compression_method}_$user"
+	# 	outshow="使用自定義目录"
+	# else
+	# 	Backup="$MODDIR/Backup_${Compression_method}_$user"
+	# 	outshow="使用當前路徑作為備份目录"
+	# fi
+    # PU="$(mount | egrep -v "rannki|0000-1" | grep -w "/mnt/media_rw" | awk '{print $3,$5}')"
+	# OTGPATH="$(echo "$PU" | awk '{print $1}')"
+	# OTGFormat="$(echo "$PU" | awk '{print $2}')"
+	# if [[ -d $OTGPATH ]]; then
+	# 	if [[ $(echo "$MODDIR" | egrep -o "^${OTGPATH}") != "" || $USBdefault = true ]]; then
+	# 		hx="true"
+	# 	else
+	# 		echoRgb "檢測到隨身碟 是否在隨身碟備份\n -音量上是，音量下不是" "2"
+	# 		get_version "選擇了隨身碟備份" "選擇了本地備份"
+	# 		[[ $branch = true ]] && hx="$branch"
+	# 	fi
+	# 	if [[ $hx = true ]]; then
+	# 		Backup="$OTGPATH/Backup_${Compression_method}_$user"
+	# 		case $OTGFormat in
+	# 		texfat | sdfat | fuseblk | exfat | NTFS | ext4 | f2fs)
+	# 			outshow="於隨身碟備份" && hx=usb
+	# 			;;
+	# 		*)
+	# 			echoRgb "隨身碟檔案系統$OTGFormat不支持超過單檔4GB\n -請格式化為exfat" "0"
+	# 			exit 1
+	# 			;;
+	# 		esac
+	# 	fi
+	# else
+	# 	echoRgb "沒有檢測到隨身碟於本地備份" "0"
+	# fi
+	# #分區詳細
+	# if [[ $(echo "$Backup" | egrep -o "^/storage/emulated") != "" ]]; then
+	# 	Backup_path="/data"
+	# else
+	# 	Backup_path="${Backup%/*}"
+	# fi
+	# echoRgb "$hx備份資料夾所使用分區統計如下↓\n -$(df -h "${Backup%/*}" | sed -n 's|% /.*|%|p' | awk '{print $(NF-3),$(NF-2),$(NF-1),$(NF)}' | awk 'END{print "總共:"$1"已用:"$2"剩餘:"$3"使用率:"$4}')檔案系統:$(df -T "$Backup_path" | sed -n 's|% /.*|%|p' | awk '{print $(NF-4)}')\n -備份目录輸出位置↓\n -$Backup"
+	# TODO 实现远程端统计
 	echoRgb "$outshow" "2"
 }
 Calculate_size() {
@@ -635,7 +638,7 @@ Backup_apk() {
 		unset xb
 		let osj++
 		result=0
-		echoRgb "Apk版本無更新 跳過備份" "2"
+		echoRgb "Apk版本无更新 跳過備份" "2"
 	else
 		case $name2 in
 		com.google.android.youtube)
@@ -793,7 +796,7 @@ Backup_data() {
 			[[ $Compression_method1 != "" ]] && Compression_method="$Compression_method1"
 			unset Compression_method1
 		else
-			echoRgb "$1數據無發生變化 跳過備份" "2"
+			echoRgb "$1數據无發生變化 跳過備份" "2"
 		fi
 	else
 		[[ -f $data_path ]] && echoRgb "$1是一個文件 不支持備份" "0" || echoRgb "$1數據不存在跳過備份" "2"
@@ -811,7 +814,7 @@ Release_data() {
 	lz4 | zst | tar)
 		unset FILE_PATH Size
 		case $FILE_NAME2 in
-		user) [[ -d $X ]] && FILE_PATH="$path2" Size="$userSize" || echoRgb "$X不存在 無法恢復$FILE_NAME2數據" "0" ;;
+		user) [[ -d $X ]] && FILE_PATH="$path2" Size="$userSize" || echoRgb "$X不存在 无法恢復$FILE_NAME2數據" "0" ;;
 		data) FILE_PATH="$path/data" Size="$dataSize";;
 		obb) FILE_PATH="$path/obb" Size="$obbSize";;
 		thanox)	FILE_PATH="/data/system" Size="$(cat "$app_details" | awk "/${FILE_NAME2}Size/"'{print $1}' | cut -f2 -d '=' | tail -n1 | sed 's/\"//g')" && find "/data/system" -name "thanos*" -maxdepth 1 -type d -exec rm -rf {} \; 2>/dev/null ;;
@@ -910,7 +913,7 @@ installapk() {
 		esac
 		echo_log "${apkfile##*/}解壓縮" && [[ -f $Backup_folder/nmsl.apk ]] && cp -r "$Backup_folder/nmsl.apk" "$TMPDIR"
 	else
-		echoRgb "你的Apk壓縮包離家出走了，可能備份後移動過程遺失了\n -解決辦法手動安裝Apk後再執行恢復脚本" "0"
+		echoRgb "你的Apk壓縮包離家出走了，可能備份後移動過程丢失了\n -解決辦法手動安裝Apk後再執行恢復脚本" "0"
 	fi
 	if [[ $result = 0 ]]; then
 		case $(find "$TMPDIR" -maxdepth 1 -name "*.apk" -type f 2>/dev/null | wc -l) in
@@ -959,7 +962,7 @@ get_name(){
 	txt="${txt/'/storage/emulated/'/'/data/media/'}"
 	if [[ $1 = Apkname ]]; then
 		rm -rf "$txt" "$txt2"
-		echoRgb "列出全部資料夾內應用名與自定義目錄壓縮包名稱" "3"
+		echoRgb "列出全部資料夾內應用名與自定義目录壓縮包名稱" "3"
 	fi
 	rgb_a=118
 	find "$MODDIR" -maxdepth 2 -name "apk.*" -type f 2>/dev/null | sort | while read; do
@@ -1060,7 +1063,7 @@ case $operate in
 backup)
 	kill_Serve
 	self_test
-	[[ ! -d $script_path ]] && echo "$script_path脚本目錄遺失" && exit 2
+	[[ ! -d $script_path ]] && echo "$script_path脚本目录丢失" && exit 2
 	case $MODDIR in
 	/storage/emulated/0/Android/* | /data/media/0/Android/* | /sdcard/Android/*) echoRgb "請勿在$MODDIR內備份" "0" && exit 2 ;;
 	esac
@@ -1078,7 +1081,7 @@ backup)
 		isBoolean "$Backup_user_data" "Backup_user_data" && Backup_user_data="$nsx"
 		isBoolean "$backup_media" "backup_media" && backup_media="$nsx"
 	else
-		echoRgb "檢查目錄是否存在已卸載應用?\n -音量上檢查，下不檢查"
+		echoRgb "檢查目录是否存在已卸載應用?\n -音量上檢查，下不檢查"
 		get_version "檢查" "不檢查" && delete_folder="$branch"
 		echoRgb "檢查到已卸載應用\n -音量上刪除資料夾，下移動到其他處"
 		get_version "刪除" "移動到其他處" && default_behavior="$branch"
@@ -1088,11 +1091,11 @@ backup)
 		get_version "備份" "不備份" && Backup_obb_data="$branch"
 		echoRgb "是否備份使用者數據\n -音量上備份，音量下不備份" "2"
 		get_version "備份" "不備份" && Backup_user_data="$branch"
-		echoRgb "全部應用備份結束後是否備份自定義目錄\n -音量上備份，音量下不備份" "2"
+		echoRgb "全部應用備份結束後是否備份自定義目录\n -音量上備份，音量下不備份" "2"
 		get_version "備份" "不備份" && backup_media="$branch"
 	fi
 	i=1
-	#數據目錄
+	#數據目录
 	txt="$MODDIR/appList.txt"
 	txt="${txt/'/storage/emulated/'/'/data/media/'}"
 	[[ ! -f $txt ]] && echoRgb "請執行\"生成應用列表.sh\"獲取應用列表再來備份" "0" && exit 1
@@ -1101,7 +1104,7 @@ backup)
 	hx="本地"
 	echoRgb "提示 脚本支持後台壓縮 可以直接離開脚本\n -或是關閉終端也能備份 如需停止脚本\n -請執行停止脚本.sh即可停止\n -備份結束將發送toast提示語" "3"
 	backup_path
-	echoRgb "配置詳細:\n -壓縮方式:$Compression_method\n -音量鍵確認:$Lo\n -Toast:$toast_info\n -更新:$update\n -已卸載應用檢查:$delete_folder\n -卸載應用默認操作(true刪除false移動):$default_behavior\n -默認使用usb:$USBdefault\n -備份外部數據:$Backup_obb_data\n -備份user數據:$Backup_user_data\n -自定義目錄備份:$backup_media"
+	echoRgb "配置詳細:\n -壓縮方式:$Compression_method\n -音量鍵確認:$Lo\n -Toast:$toast_info\n -更新:$update\n -已卸載應用檢查:$delete_folder\n -卸載應用默認操作(true刪除false移動):$default_behavior\n -默認使用usb:$USBdefault\n -備份外部數據:$Backup_obb_data\n -備份user數據:$Backup_user_data\n -自定義目录備份:$backup_media"
 	D="1"
 	C="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n '$=')"
 	if [[ $delete_folder = true ]]; then
@@ -1182,7 +1185,7 @@ backup)
 	en=118
 	echo "$script">"$TMPDIR/scriptTMP" && echo "$script">"$TMPDIR/scriptTMP"
 	osn=0; osj=0; osk=0
-	#獲取已經開啟的無障礙
+	#獲取已經開啟的无障礙
 	var="$(settings get secure enabled_accessibility_services 2>/dev/null)"
 	#獲取預設鍵盤
 	keyboard="$(settings get secure default_input_method 2>/dev/null)"
@@ -1266,13 +1269,13 @@ backup)
 			appinfo -d " " -o pn -p | while read ; do
 			    pm unsuspend "$REPLY" | sed "s/Package $name2/ -應用:$name1/g ; s/new suspended state: false/暫停狀態:凍結/g"
 			done
-			#設置無障礙開關
+			#設置无障礙開關
 			if [[ $var != "" ]]; then
 				if [[ $var != null ]]; then
 					settings put secure enabled_accessibility_services "$var" &>/dev/null 
-					echo_log "設置無障礙"
+					echo_log "設置无障礙"
 					settings put secure accessibility_enabled 1 &>/dev/null
-					echo_log "打開無障礙開關"
+					echo_log "打開无障礙開關"
 				fi
 			fi
 			#設置鍵盤
@@ -1282,9 +1285,9 @@ backup)
 				settings put secure default_input_method "$keyboard" &>/dev/null
 				echo_log "設置鍵盤$(appinfo -d "(" -ed ")" -o ands,pn -pn "${keyboard%/*}" 2>/dev/null)"
 			fi
-			[[ $update_apk2 = "" ]] && update_apk2="暫無更新"
-			[[ $add_app2 = "" ]] && add_app2="暫無更新"
-			echoRgb "\n -已更新的apk=\"$osn\"\n -已新增的備份=\"$osk\"\n -apk版本號無變化=\"$osj\"\n -下列為版本號已變更的應用\n$update_apk2\n -新增的備份....\n$add_app2" "3"
+			[[ $update_apk2 = "" ]] && update_apk2="暫无更新"
+			[[ $add_app2 = "" ]] && add_app2="暫无更新"
+			echoRgb "\n -已更新的apk=\"$osn\"\n -已新增的備份=\"$osk\"\n -apk版本號无變化=\"$osj\"\n -下列為版本號已變更的應用\n$update_apk2\n -新增的備份....\n$add_app2" "3"
 			echo "$(sort "$txt2" | sed -e '/^$/d')" >"$txt2"
 			if [[ $backup_media = true ]]; then
 				A=1
@@ -1311,10 +1314,10 @@ backup)
 						echoRgb "_________________$(endtime 1 "已經")___________________"
 						rgb_a="$rgb_d" && let A++
 					done
-					echoRgb "目錄↓↓↓\n -$Backup_folder"
+					echoRgb "目录↓↓↓\n -$Backup_folder"
 					endtime 1 "自定義備份"
 				else
-					echoRgb "自定義路徑為空 無法備份" "0"
+					echoRgb "自定義路徑為空 无法備份" "0"
 				fi
 			fi
 		fi
@@ -1358,7 +1361,7 @@ Restore)
 	echoRgb "假設反悔了要停止脚本請儘速離開此脚本點擊$MODDIR_NAME/停止脚本.sh\n -否則脚本將繼續執行直到結束" "0"
 	echoRgb "如果大量提示找不到資料夾請執行$MODDIR_NAME/轉換資料夾名稱.sh"
 	disable_verify
-	[[ ! -d $path2 ]] && echoRgb "设备不存在user目錄" "0" && exit 1
+	[[ ! -d $path2 ]] && echoRgb "设备不存在user目录" "0" && exit 1
 	i=1
 	txt="$MODDIR/appList.txt"
 	[[ ! -f $txt ]] && echoRgb "請執行\"重新生成應用列表.sh\"獲取應用列表再來恢復" "0" && exit 2
@@ -1438,7 +1441,7 @@ Restore)
     					pm unsuspend "$name2" 2>/dev/null | sed "s/Package $name2/ -應用:$name1/g ; s/new suspended state: false/暫停狀態:解凍/g"
 				fi
 			else
-				[[ $No_backupdata = "" ]]&& echoRgb "$name1沒有安裝無法恢復數據" "0"
+				[[ $No_backupdata = "" ]]&& echoRgb "$name1沒有安裝无法恢復數據" "0"
 			fi
 			endtime 2 "$name1恢複" "2" && echoRgb "完成$((i * 100 / r))%" "3"
 			rgb_d="$rgb_a"
@@ -1446,7 +1449,7 @@ Restore)
 			echoRgb "_________________$(endtime 1 "已經")___________________"
 			rgb_a="$rgb_d"
 		else
-			echoRgb "$Backup_folder資料夾遺失，無法恢複" "0"
+			echoRgb "$Backup_folder資料夾丢失，无法恢複" "0"
 		fi
 		if [[ $i = $r ]]; then
             appinfo -d " " -o pn -p | while read ; do
@@ -1486,14 +1489,14 @@ Restore2)
 	kill_Serve
 	self_test
 	disable_verify
-	[[ ! -d $path2 ]] && echoRgb "设备不存在user目錄" "0" && exit 1
+	[[ ! -d $path2 ]] && echoRgb "设备不存在user目录" "0" && exit 1
 	[[ $(which restorecon) = "" ]] && echoRgb "restorecon命令不存在" "0" && exit 1
 	#記錄開始時間
 	starttime1="$(date -u "+%s")"
 	echo "$script">"$TMPDIR/scriptTMP"
 	Backup_folder="$MODDIR"
 	if [[ ! -f $Backup_folder/app_details ]]; then
-		echoRgb "$Backup_folder/app_details遺失，無法獲取包名" "0" && exit 1
+		echoRgb "$Backup_folder/app_details丢失，无法獲取包名" "0" && exit 1
 	else
 		. "$Backup_folder/app_details" &>/dev/null
 	fi
@@ -1525,7 +1528,7 @@ Restore2)
 		done
         pm unsuspend "$name2" 2>/dev/null | sed "s/Package $name2/ -應用:$name1/g ; s/new suspended state: false/暫停狀態:解凍/g"
 	else
-		echoRgb "$name1沒有安裝無法恢復數據" "0"
+		echoRgb "$name1沒有安裝无法恢復數據" "0"
 	fi
 	endtime 1 "恢複開始到結束" && echoRgb "如發現應用閃退請重新開機" && rm -rf "$TMPDIR"/*
 	rm -rf "$TMPDIR/scriptTMP"
@@ -1654,7 +1657,7 @@ Getlist)
 	fi
 	wait
 	endtime 1
-	[[ ! -e $MODDIR/tmp ]] && echoRgb "無新增應用" || echoRgb "輸出包名結束 請查看$nametxt"
+	[[ ! -e $MODDIR/tmp ]] && echoRgb "无新增應用" || echoRgb "輸出包名結束 請查看$nametxt"
 	rm -rf "$MODDIR/tmp"
 	;;
 backup_media)
@@ -1695,7 +1698,7 @@ backup_media)
 		rm -rf "$TMPDIR/scriptTMP"
 		} &
 	else
-		echoRgb "自定義路徑為空 無法備份" "0"
+		echoRgb "自定義路徑為空 无法備份" "0"
 	fi
 	;;
 esac

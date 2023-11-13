@@ -19,7 +19,7 @@ fi
 echo "$(sed 's/true/1/g ; s/false/0/g' "$conf_path")">"$conf_path"
 . "$conf_path" &>/dev/null
 echoRgb() {
-	#轉換echo顏色提高可讀性
+	#转换echo顏色提高可讀性
 	if [[ $2 = 0 ]]; then
 		echo -e "\e[38;5;197m -$1\e[0m"
 	elif [[ $2 = 1 ]]; then
@@ -34,7 +34,7 @@ echoRgb() {
 }
 [ "$rgb_a" = "" ] && rgb_a=214
 if [ "$(whoami)" != root ]; then
-	echoRgb "你是憨批？不給Root用你媽 爬" "0"
+	echoRgb "需要root才可以使用" "0"
 	exit 1
 fi
 abi="$(getprop ro.product.cpu.abi)"
@@ -127,10 +127,10 @@ export CLASSPATH="$bin_path/classes.dex"
 TMPDIR="/data/local/tmp"
 [[ ! -d $TMPDIR ]] && mkdir "$TMPDIR"
 if [[ $(which busybox) = "" ]]; then
-	echoRgb "環境變量中沒有找到busybox 請在tools/bin內添加一個\narm64可用的busybox\n或是安裝搞機助手 scene或是Magisk busybox模塊...." "0"
+	echoRgb "環境變量中沒有找到busybox 請在tools/bin內添加一个\narm64可用的busybox\n或是安裝搞機助手 scene或是Magisk busybox模塊...." "0"
 	exit 1
 fi
-#下列為自定義函數
+#下列為自定义函數
 alias appinfo="exec app_process /system/bin --nice-name=appinfo han.core.order.appinfo.AppInfo $@"
 alias down="exec app_process /system/bin --nice-name=down han.core.order.down.Down $@"
 alias zstd="zstd -T0 -1 -q --priority=rt"
@@ -247,27 +247,27 @@ update_script() {
 		case $(echo "$zipFile" | wc -l) in
 		1)
 			if [[ $(unzip -l "$zipFile" | awk '{print $4}' | egrep -o "^backup_settings.conf$") = "" ]]; then
-				echoRgb "${zipFile##*/}並非指定的備份zip，請刪除後重新放置\n -何謂更新zip? 就是GitHub release頁面下載的zip" "0"
+				echoRgb "${zipFile##*/}並非指定的备份zip，請刪除後重新放置\n -何謂更新zip? 就是GitHub release頁面下載的zip" "0"
 			else
 				unzip -o "$zipFile" -j "tools/bin/tools.sh" -d "$MODDIR" &>/dev/null
 				if [[ $(expr "$(echo "$backup_version" | tr -d "a-zA-Z")" \> "$(cat "$MODDIR/tools.sh" | awk '/backup_version/{print $1}' | cut -f2 -d '=' | head -1 | sed 's/\"//g' | tr -d "a-zA-Z")") -eq 0 ]]; then
 					echoRgb "從$zipFile更新"
 					cp -r "$tools_path" "$TMPDIR" && rm -rf "$tools_path"
 					find "$MODDIR" -maxdepth 3 -name "*.sh" -type f -exec rm -rf {} \;
-					unzip -o "$zipFile" -x "backup_settings.conf" -d "$MODDIR" | sed 's/inflating/釋放/g ; s/creating/創建/g ; s/Archive/解壓縮/g'
-					echo_log "解壓縮${zipFile##*/}"
+					unzip -o "$zipFile" -x "backup_settings.conf" -d "$MODDIR" | sed 's/inflating/釋放/g ; s/creating/創建/g ; s/Archive/解压缩/g'
+					echo_log "解压缩${zipFile##*/}"
 					if [[ $result = 0 ]]; then
 						case $MODDIR in
 						*Backup_*)
 							if [[ -f $MODDIR/app_details ]]; then
 								mv "$MODDIR/tools" "${MODDIR%/*}"
-								echoRgb "更新當前${MODDIR##*/}目录下恢復相關脚本+外部tools目录與脚本"
+								echoRgb "更新當前${MODDIR##*/}目录下恢复相關脚本+外部tools目录与脚本"
 								cp -r "$tools_path/script/Get_DirName" "${MODDIR%/*}/重新生成應用列表.sh"
-								cp -r "$tools_path/script/convert" "${MODDIR%/*}/轉換資料夾名稱.sh"
-								cp -r "$tools_path/script/check_file" "${MODDIR%/*}/壓縮檔完整性檢查.sh"
-								cp -r "$tools_path/script/restore" "${MODDIR%/*}/恢復備份.sh"
+								cp -r "$tools_path/script/convert" "${MODDIR%/*}/转换文件夹名称.sh"
+								cp -r "$tools_path/script/check_file" "${MODDIR%/*}/压缩包完整性检查.sh"
+								cp -r "$tools_path/script/restore" "${MODDIR%/*}/恢复备份.sh"
 								cp -r "$MODDIR/停止脚本.sh" "${MODDIR%/*}/停止脚本.sh"
-								[[ -d ${MODDIR%/*}/Media ]] && cp -r "$tools_path/script/restore3" "${MODDIR%/*}/恢復自定義資料夾.sh"
+								[[ -d ${MODDIR%/*}/Media ]] && cp -r "$tools_path/script/restore3" "${MODDIR%/*}/恢复自定义文件夹.sh"
 								find "${MODDIR%/*}" -maxdepth 1 -type d | sort | while read; do
 									if [[ -f $REPLY/app_details ]]; then
 										unset PackageName
@@ -283,21 +283,21 @@ update_script() {
 										fi
 									fi
 								done
-								if [[ -d ${MODDIR%/*/*}/tools && -f ${MODDIR%/*/*}/備份應用.sh ]]; then
-									echoRgb "更新${MODDIR%/*/*}/tools與備份相關脚本"
+								if [[ -d ${MODDIR%/*/*}/tools && -f ${MODDIR%/*/*}/备份應用.sh ]]; then
+									echoRgb "更新${MODDIR%/*/*}/tools与备份相關脚本"
 									rm -rf "${MODDIR%/*/*}/tools"
 									find "${MODDIR%/*/*}" -maxdepth 1 -name "*.sh" -type f -exec rm -rf {} \;
-									mv "$MODDIR/備份應用.sh" "$MODDIR/生成應用列表.sh" "$MODDIR/備份自定義資料夾.sh" "$MODDIR/停止脚本.sh" "${MODDIR%/*/*}"
+									mv "$MODDIR/备份應用.sh" "$MODDIR/生成應用列表.sh" "$MODDIR/备份自定义文件夹.sh" "$MODDIR/停止脚本.sh" "${MODDIR%/*/*}"
 									cp -r "$tools_path" "${MODDIR%/*/*}"
 								fi
 								rm -rf "$MODDIR/停止脚本.sh"
 							else
-								echoRgb "更新當前${MODDIR##*/}目录下恢復相關脚本+tools目录"
+								echoRgb "更新當前${MODDIR##*/}目录下恢复相關脚本+tools目录"
 								cp -r "$tools_path/script/Get_DirName" "$MODDIR/重新生成應用列表.sh"
-								cp -r "$tools_path/script/convert" "$MODDIR/轉換資料夾名稱.sh"
-								cp -r "$tools_path/script/check_file" "$MODDIR/壓縮檔完整性檢查.sh"
-								cp -r "$tools_path/script/restore" "$MODDIR/恢復備份.sh"
-								[[ -d $MODDIR/Media ]] && cp -r "$tools_path/script/restore3" "$MODDIR/恢復自定義資料夾.sh"
+								cp -r "$tools_path/script/convert" "$MODDIR/转换文件夹名称.sh"
+								cp -r "$tools_path/script/check_file" "$MODDIR/压缩包完整性检查.sh"
+								cp -r "$tools_path/script/restore" "$MODDIR/恢复备份.sh"
+								[[ -d $MODDIR/Media ]] && cp -r "$tools_path/script/restore3" "$MODDIR/恢复自定义文件夹.sh"
 								find "$MODDIR" -maxdepth 1 -type d | sort | while read; do
 									if [[ -f $REPLY/app_details ]]; then
 										unset PackageName
@@ -313,29 +313,29 @@ update_script() {
 										fi
 									fi
 								done
-								if [[ -d ${MODDIR%/*}/tools && -f ${MODDIR%/*}/備份應用.sh ]]; then
-									echoRgb "更新${MODDIR%/*}/tools與備份相關脚本"
+								if [[ -d ${MODDIR%/*}/tools && -f ${MODDIR%/*}/备份應用.sh ]]; then
+									echoRgb "更新${MODDIR%/*}/tools与备份相關脚本"
 									rm -rf "${MODDIR%/*}/tools"
 									find "${MODDIR%/*}" -maxdepth 1 -name "*.sh" -type f -exec rm -rf {} \;
-									cp -r "$MODDIR/備份應用.sh" "$MODDIR/停止脚本.sh" "$MODDIR/生成應用列表.sh" "$MODDIR/備份自定義資料夾.sh" "${MODDIR%/*}"
+									cp -r "$MODDIR/备份應用.sh" "$MODDIR/停止脚本.sh" "$MODDIR/生成應用列表.sh" "$MODDIR/备份自定义文件夹.sh" "${MODDIR%/*}"
 									cp -r "$tools_path" "${MODDIR%/*}"
 								fi
 							fi
-							rm -rf "$MODDIR/備份自定義資料夾.sh" "$MODDIR/生成應用列表.sh" "$MODDIR/備份應用.sh" "$tools_path/script"
+							rm -rf "$MODDIR/备份自定义文件夹.sh" "$MODDIR/生成應用列表.sh" "$MODDIR/备份應用.sh" "$tools_path/script"
 							;;
 						*)
 							if [[ $(find "$MODDIR" -maxdepth 1 -name "Backup_*" -type d) != "" ]]; then
 								find "$MODDIR" -maxdepth 1 -name "Backup_*" -type d | while read backup_path; do
 									if [[ -d $backup_path && $backup_path != $MODDIR ]]; then
-										echoRgb "更新當前目录下備份相關脚本&tools目录+${backup_path##*/}內tools目录+恢復脚本+tools"
+										echoRgb "更新當前目录下备份相關脚本&tools目录+${backup_path##*/}內tools目录+恢复脚本+tools"
 										rm -rf "$backup_path/tools"
 										cp -r "$tools_path" "$backup_path" && rm -rf "$backup_path/tools/bin/zip" "$backup_path/tools/script"
-										cp -r "$tools_path/script/restore" "$backup_path/恢復備份.sh"
+										cp -r "$tools_path/script/restore" "$backup_path/恢复备份.sh"
 										cp -r "$tools_path/script/Get_DirName" "$backup_path/重新生成應用列表.sh"
-										cp -r "$tools_path/script/convert" "$backup_path/轉換資料夾名稱.sh"
-										cp -r "$tools_path/script/check_file" "$backup_path/壓縮檔完整性檢查.sh"
+										cp -r "$tools_path/script/convert" "$backup_path/转换文件夹名称.sh"
+										cp -r "$tools_path/script/check_file" "$backup_path/压缩包完整性检查.sh"
 										cp -r "$MODDIR/停止脚本.sh" "$backup_path/停止脚本.sh"
-										[[ -d $backup_path/Media ]] && cp -r "$tools_path/script/restore3" "$backup_path/恢復自定義資料夾.sh"
+										[[ -d $backup_path/Media ]] && cp -r "$tools_path/script/restore3" "$backup_path/恢复自定义文件夹.sh"
 										find "$MODDIR" -maxdepth 2 -type d | sort | while read; do
 											if [[ -f $REPLY/app_details ]]; then
 												unset PackageName
@@ -354,7 +354,7 @@ update_script() {
 									fi
 								done
 							else
-								echoRgb "更新當前${MODDIR##*/}目录下備份相關脚本+tools目录"
+								echoRgb "更新當前${MODDIR##*/}目录下备份相關脚本+tools目录"
 							fi
 							;;
 						esac
@@ -372,7 +372,7 @@ update_script() {
 			fi
 			;;
 		*)
-			echoRgb "錯誤 請刪除當前目录多餘zip\n -保留一個最新的數據備份.zip\n -下列為當前目录zip\n$zipFile" "0"
+			echoRgb "錯誤 請刪除當前目录多餘zip\n -保留一个最新的数据备份.zip\n -下列為當前目录zip\n$zipFile" "0"
 			exit 1
 			;;
 		esac
@@ -400,15 +400,15 @@ backup|Restore|Restore2|Getlist)
 			[[ $REPLY = 0 ]] && echoRgb "主用戶:$REPLY" "2" || echoRgb "分身用戶:$REPLY" "2"
 		done
 	fi
-	[[ ! -d $path2 ]] && echoRgb "$user分區不存在，請將上方提示的用戶id按照需求填入\n -$MODDIR_NAME/backup_settings.conf配置項user=,一次只能填寫一個" "0" && exit 2
+	[[ ! -d $path2 ]] && echoRgb "$user分區不存在，請將上方提示的用戶id按照需求填入\n -$MODDIR_NAME/backup_settings.conf配置項user=,一次只能填寫一个" "0" && exit 2
 	echoRgb "當前操作為用戶$user"
 	if [[ $operate != Getlist && $operate != Restore2 ]]; then
 		isBoolean "$Lo" "Lo" && Lo="$nsx"
 		if [[ $Lo = false ]]; then
 			isBoolean "$toast_info" "toast_info" && toast_info="$nsx"
 		else
-			echoRgb "備份完成或是遭遇異常發送toast與狀態欄通知？\n -音量上提示，音量下靜默備份" "2"
-			get_version "提示" "靜默備份" && toast_info="$branch"
+			echoRgb "备份完成或是遭遇異常發送toast与狀態欄通知？\n -音量上提示，音量下靜默备份" "2"
+			get_version "提示" "靜默备份" && toast_info="$branch"
 		fi
 		if [[ $toast_info = true ]]; then
 			pm enable "ice.message" &>/dev/null
@@ -430,7 +430,7 @@ esac
 cdn=2
 #settings get system system_locales
 # LANG="$(getprop "persist.sys.locale")"
-# echoRgb "檢查更新中 请稍后......."
+# echoRgb "检查更新中 请稍后......."
 # Language="https://api.github.com/repos/Petit-Abba/backup_script_zh-CN/releases/latest"
 # if [[ $LANG != "" ]]; then
 # 	case $LANG in
@@ -527,7 +527,7 @@ cdn=2
 # 								update_script
 # 							fi
 # 						else
-# 							echoRgb "更新脚本步驟如下\n -1.將剪貼簿內的連結用瀏覽器下載\n -2.將zip壓縮包完整不解壓縮放在$MODDIR\n -3.在$MODDIR目录隨便執行一個脚本\n -4.假設沒有提示錯誤重新進入脚本如版本號發生變化則更新成功" "2"
+# 							echoRgb "更新脚本步驟如下\n -1.將剪貼簿內的連結用瀏覽器下載\n -2.將zip压缩包完整不解压缩放在$MODDIR\n -3.在$MODDIR目录隨便執行一个脚本\n -4.假設沒有提示錯誤重新進入脚本如版本號發生變化則更新成功" "2"
 # 							starttime1="$(date -u "+%s")"
 # 							xtext "$zip_url" 
 # 							echo_log "複製連結到剪裁版"
@@ -549,10 +549,10 @@ backup_path() {
 	# if [[ $Output_path != "" ]]; then
 	# 	[[ ${Output_path: -1} = / ]] && Output_path="${Output_path%?}"
 	# 	Backup="$Output_path/Backup_${Compression_method}_$user"
-	# 	outshow="使用自定義目录"
+	# 	outshow="使用自定义目录"
 	# else
 	# 	Backup="$MODDIR/Backup_${Compression_method}_$user"
-	# 	outshow="使用當前路徑作為備份目录"
+	# 	outshow="使用當前路徑作為备份目录"
 	# fi
     # PU="$(mount | egrep -v "rannki|0000-1" | grep -w "/mnt/media_rw" | awk '{print $3,$5}')"
 	# OTGPATH="$(echo "$PU" | awk '{print $1}')"
@@ -561,15 +561,15 @@ backup_path() {
 	# 	if [[ $(echo "$MODDIR" | egrep -o "^${OTGPATH}") != "" || $USBdefault = true ]]; then
 	# 		hx="true"
 	# 	else
-	# 		echoRgb "檢測到隨身碟 是否在隨身碟備份\n -音量上是，音量下不是" "2"
-	# 		get_version "選擇了隨身碟備份" "選擇了本地備份"
+	# 		echoRgb "檢測到隨身碟 是否在隨身碟备份\n -音量上是，音量下不是" "2"
+	# 		get_version "選擇了隨身碟备份" "選擇了本地备份"
 	# 		[[ $branch = true ]] && hx="$branch"
 	# 	fi
 	# 	if [[ $hx = true ]]; then
 	# 		Backup="$OTGPATH/Backup_${Compression_method}_$user"
 	# 		case $OTGFormat in
 	# 		texfat | sdfat | fuseblk | exfat | NTFS | ext4 | f2fs)
-	# 			outshow="於隨身碟備份" && hx=usb
+	# 			outshow="於隨身碟备份" && hx=usb
 	# 			;;
 	# 		*)
 	# 			echoRgb "隨身碟檔案系統$OTGFormat不支持超過單檔4GB\n -請格式化為exfat" "0"
@@ -578,7 +578,7 @@ backup_path() {
 	# 		esac
 	# 	fi
 	# else
-	# 	echoRgb "沒有檢測到隨身碟於本地備份" "0"
+	# 	echoRgb "沒有檢測到隨身碟於本地备份" "0"
 	# fi
 	# #分區詳細
 	# if [[ $(echo "$Backup" | egrep -o "^/storage/emulated") != "" ]]; then
@@ -586,24 +586,24 @@ backup_path() {
 	# else
 	# 	Backup_path="${Backup%/*}"
 	# fi
-	# echoRgb "$hx備份資料夾所使用分區統計如下↓\n -$(df -h "${Backup%/*}" | sed -n 's|% /.*|%|p' | awk '{print $(NF-3),$(NF-2),$(NF-1),$(NF)}' | awk 'END{print "總共:"$1"已用:"$2"剩餘:"$3"使用率:"$4}')檔案系統:$(df -T "$Backup_path" | sed -n 's|% /.*|%|p' | awk '{print $(NF-4)}')\n -備份目录輸出位置↓\n -$Backup"
+	# echoRgb "$hx备份文件夹所使用分區統計如下↓\n -$(df -h "${Backup%/*}" | sed -n 's|% /.*|%|p' | awk '{print $(NF-3),$(NF-2),$(NF-1),$(NF)}' | awk 'END{print "總共:"$1"已用:"$2"剩餘:"$3"使用率:"$4}')檔案系統:$(df -T "$Backup_path" | sed -n 's|% /.*|%|p' | awk '{print $(NF-4)}')\n -备份目录輸出位置↓\n -$Backup"
 	# TODO 实现远程端统计
 	echoRgb "$outshow" "2"
 }
 Calculate_size() {
-	#計算出備份大小跟差異性
+	#計算出备份大小跟差異性
 	filesizee="$(du -ks "$1" | awk '{print $1}')"
 	dsize="$(($((filesizee - filesize)) / 1024))"
-	echoRgb "備份資料夾路徑↓↓↓\n -$1"
-	echoRgb "備份資料夾總體大小$(du -ksh "$1" | awk '{print $1}')"
+	echoRgb "备份文件夹路徑↓↓↓\n -$1"
+	echoRgb "备份文件夹總體大小$(du -ksh "$1" | awk '{print $1}')"
 	if [[ $dsize -gt 0 ]]; then
 		if [[ $((dsize / 1024)) -gt 0 ]]; then
-			echoRgb "本次備份: $((dsize / 1024))gb"
+			echoRgb "本次备份: $((dsize / 1024))gb"
 		else
-			echoRgb "本次備份: ${dsize}mb"
+			echoRgb "本次备份: ${dsize}mb"
 		fi
 	else
-		echoRgb "本次備份: $(($((filesizee - filesize)) * 1000 / 1024))kb"
+		echoRgb "本次备份: $(($((filesizee - filesize)) * 1000 / 1024))kb"
 	fi
 }
 size () {
@@ -628,8 +628,8 @@ partition_info() {
 	[[ $lxj -ge 97 ]] && echoRgb "$hx空間不足,達到$lxj%" "0" && exit 2
 }
 Backup_apk() {
-	#檢測apk狀態進行備份
-	#創建APP備份文件夾
+	#檢測apk狀態進行备份
+	#創建APP备份文件夾
 	[[ ! -d $Backup_folder ]] && mkdir -p "$Backup_folder"
 	apk_version2="$(pm list packages --show-versioncode --user "$user" "$name2" 2>/dev/null | cut -f3 -d ':' | head -n 1)"
 	apk_version3="$(dumpsys package "$name2" 2>/dev/null | awk '/versionName=/{print $1}' | cut -f2 -d '=' | head -1)"
@@ -638,7 +638,7 @@ Backup_apk() {
 		unset xb
 		let osj++
 		result=0
-		echoRgb "Apk版本无更新 跳過備份" "2"
+		echoRgb "Apk版本无更新 跳過备份" "2"
 	else
 		case $name2 in
 		com.google.android.youtube)
@@ -661,7 +661,7 @@ Backup_apk() {
 				echoRgb "版本:$apk_version2"
 			fi
 			partition_info "$Backup"
-			#備份apk
+			#备份apk
 			echoRgb "$1"
 			echo "$apk_path" | sed -e '/^$/d' | while read; do
 				echoRgb "${REPLY##*/} $(size "$REPLY")"
@@ -669,12 +669,12 @@ Backup_apk() {
 			(
 				cd "$apk_path2"
 				case $Compression_method in
-				tar | TAR | Tar) tar --checkpoint-action="ttyout=%T\r" -cf "$Backup_folder/apk.tar" *.apk ;;
-				lz4 | LZ4 | Lz4) tar --checkpoint-action="ttyout=%T\r" -cf - *.apk | lz4>"$Backup_folder/apk.tar.lz4" ;;
-				zstd | Zstd | ZSTD) tar --checkpoint-action="ttyout=%T\r" -cf - *.apk | zstd >"$Backup_folder/apk.tar.zst" ;;
+				tar | TAR | Tar) tar --checkpoint-action="ttyout=%T\r" -cf - *.apk | sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat > "$outputPath/apk.tar" ;;
+				lz4 | LZ4 | Lz4) tar --checkpoint-action="ttyout=%T\r" -cf - *.apk | lz4 | sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat > "$outputPath/apk.tar.lz4" ;;
+				zstd | Zstd | ZSTD) tar --checkpoint-action="ttyout=%T\r" -cf - *.apk | zstd | sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat > "$outputPath/apk.tar.zst" ;;
 				esac
 			)
-			echo_log "備份$apk_number個Apk"
+			echo_log "备份$apk_number个Apk"
 			if [[ $result = 0 ]]; then
 				case $Compression_method in
 				tar | Tar | TAR) Validation_file "$Backup_folder/apk.tar" ;;
@@ -700,7 +700,7 @@ Backup_apk() {
 					rm -rf "$Backup_folder"
 				fi
 				if [[ $name2 = com.android.chrome ]]; then
-					#刪除所有舊apk ,保留一個最新apk進行備份
+					#刪除所有舊apk ,保留一个最新apk進行备份
 					ReservedNum=1
 					FileNum="$(ls /data/app/*/com.google.android.trichromelibrary_*/base.apk 2>/dev/null | wc -l)"
 					while [[ $FileNum -gt $ReservedNum ]]; do
@@ -715,12 +715,12 @@ Backup_apk() {
 			fi
 		else
 			let osj++
-			echoRgb "$name1不支持備份 需要使用vanced安裝" "0" && rm -rf "$Backup_folder"
+			echoRgb "$name1不支持备份 需要使用vanced安裝" "0" && rm -rf "$Backup_folder"
 		fi
 	fi
 	[[ $name2 = bin.mt.plus && ! -f $Backup/$name1.apk ]] && cp -r "$apk_path" "$Backup/$name1.apk"
 }
-#檢測數據位置進行備份
+#檢測数据位置進行备份
 Backup_data() {
 	data_path="$path/$1/$name2"
 	case $1 in
@@ -750,24 +750,24 @@ Backup_data() {
         fi
 		if [[ $Size != $Filesize ]]; then
 			partition_info "$Backup"
-			echoRgb "備份$1數據($get_size)"
+			echoRgb "备份$1数据($get_size)"
 			case $1 in
 			user)
 				case $Compression_method in
-				tar | Tar | TAR) tar --checkpoint-action="ttyout=%T\r" --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" --exclude="${data_path##*/}/code_cache" --exclude="${data_path##*/}/no_backup" -cpf "$Backup_folder/$1.tar" -C "${data_path%/*}" "${data_path##*/}" 2>/dev/null ;;
-				zstd | Zstd | ZSTD) tar --checkpoint-action="ttyout=%T\r" --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" --exclude="${data_path##*/}/code_cache" --exclude="${data_path##*/}/no_backup" -cpf - -C "${data_path%/*}" "${data_path##*/}" | zstd>"$Backup_folder/$1.tar.zst" 2>/dev/null ;;
-				lz4 | Lz4 | LZ4) tar --checkpoint-action="ttyout=%T\r" --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" --exclude="${data_path##*/}/code_cache" --exclude="${data_path##*/}/no_backup" -cpf - -C "${data_path%/*}" "${data_path##*/}" | lz4>"$Backup_folder/$1.tar.lz4" 2>/dev/null ;;
+				tar | Tar | TAR) tar --checkpoint-action="ttyout=%T\r" --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" --exclude="${data_path##*/}/code_cache" --exclude="${data_path##*/}/no_backup" -cpf - -C "${data_path%/*}" "${data_path##*/}" | sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat > "$outputPath/$1.tar" 2>/dev/null ;;
+				zstd | Zstd | ZSTD) tar --checkpoint-action="ttyout=%T\r" --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" --exclude="${data_path##*/}/code_cache" --exclude="${data_path##*/}/no_backup" -cpf - -C "${data_path%/*}" "${data_path##*/}" | zstd | sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat > "$outputPath/$1.tar.zst" 2>/dev/null ;;
+				lz4 | Lz4 | LZ4) tar --checkpoint-action="ttyout=%T\r" --exclude="${data_path##*/}/.ota" --exclude="${data_path##*/}/cache" --exclude="${data_path##*/}/lib" --exclude="${data_path##*/}/code_cache" --exclude="${data_path##*/}/no_backup" -cpf - -C "${data_path%/*}" "${data_path##*/}" | lz4 | sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat > "$outputPath/$1.tar.lz4" 2>/dev/null ;;
 				esac
 				;;
 			*)
 				case $Compression_method in
-				tar | Tar | TAR) tar --checkpoint-action="ttyout=%T\r" --exclude="Backup_"* --exclude="${data_path##*/}/cache" -cpf "$Backup_folder/$1.tar" -C "${data_path%/*}" "${data_path##*/}" ;;
-				zstd | Zstd | ZSTD) tar --checkpoint-action="ttyout=%T\r" --exclude="Backup_"* --exclude="${data_path##*/}/cache" -cpf - -C "${data_path%/*}" "${data_path##*/}" | zstd>"$Backup_folder/$1.tar.zst" 2>/dev/null ;;
-				lz4 | Lz4 | LZ4) tar --checkpoint-action="ttyout=%T\r" --exclude="Backup_"* --exclude="${data_path##*/}/cache" -cpf - -C "${data_path%/*}" "${data_path##*/}" | lz4>"$Backup_folder/$1.tar.lz4" 2>/dev/null ;;
+				tar | Tar | TAR) tar --checkpoint-action="ttyout=%T\r" --exclude="Backup_"* --exclude="${data_path##*/}/cache" -cpf - -C "${data_path%/*}" "${data_path##*/}" | sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat > "$outputPath/$1.tar" 2>/dev/null ;;
+				zstd | Zstd | ZSTD) tar --checkpoint-action="ttyout=%T\r" --exclude="Backup_"* --exclude="${data_path##*/}/cache" -cpf - -C "${data_path%/*}" "${data_path##*/}" | zstd | sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat > "$outputPath/$1.tar.zst" 2>/dev/null ;;
+				lz4 | Lz4 | LZ4) tar --checkpoint-action="ttyout=%T\r" --exclude="Backup_"* --exclude="${data_path##*/}/cache" -cpf - -C "${data_path%/*}" "${data_path##*/}" | lz4 | sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat > "$outputPath/$1.tar.lz4" 2>/dev/null ;;
 				esac
 				;;
 			esac
-			echo_log "備份$1數據"
+			echo_log "备份$1数据"
 			if [[ $result = 0 ]]; then
 				case $Compression_method in
 				tar | Tar | TAR) Validation_file "$Backup_folder/$1.tar" ;;
@@ -796,10 +796,10 @@ Backup_data() {
 			[[ $Compression_method1 != "" ]] && Compression_method="$Compression_method1"
 			unset Compression_method1
 		else
-			echoRgb "$1數據无發生變化 跳過備份" "2"
+			echoRgb "$1数据无發生變化 跳過备份" "2"
 		fi
 	else
-		[[ -f $data_path ]] && echoRgb "$1是一個文件 不支持備份" "0" || echoRgb "$1數據不存在跳過備份" "2"
+		[[ -f $data_path ]] && echoRgb "$1是一个文件 不支持备份" "0" || echoRgb "$1数据不存在跳過备份" "2"
 	fi
 	partition_info "$Backup"
 }
@@ -814,7 +814,7 @@ Release_data() {
 	lz4 | zst | tar)
 		unset FILE_PATH Size
 		case $FILE_NAME2 in
-		user) [[ -d $X ]] && FILE_PATH="$path2" Size="$userSize" || echoRgb "$X不存在 无法恢復$FILE_NAME2數據" "0" ;;
+		user) [[ -d $X ]] && FILE_PATH="$path2" Size="$userSize" || echoRgb "$X不存在 无法恢复$FILE_NAME2数据" "0" ;;
 		data) FILE_PATH="$path/data" Size="$dataSize";;
 		obb) FILE_PATH="$path/obb" Size="$obbSize";;
 		thanox)	FILE_PATH="/data/system" Size="$(cat "$app_details" | awk "/${FILE_NAME2}Size/"'{print $1}' | cut -f2 -d '=' | tail -n1 | sed 's/\"//g')" && find "/data/system" -name "thanos*" -maxdepth 1 -type d -exec rm -rf {} \; 2>/dev/null ;;
@@ -837,21 +837,25 @@ Release_data() {
 				fi
 			fi ;;
 		esac
-        echoRgb "恢復$FILE_NAME2數據 釋放$(size "$(awk 'BEGIN{printf "%.2f\n", "'$Size'"*'1024'}')")" "3"
+        echoRgb "恢复$FILE_NAME2数据 釋放$(size "$(awk 'BEGIN{printf "%.2f\n", "'$Size'"*'1024'}')")" "3"
    		if [[ $FILE_PATH != "" ]]; then
             [[ ${MODDIR_NAME##*/} != Media ]] && rm -rf "$FILE_PATH/$name2"
 		    case ${FILE_NAME##*.} in
 			lz4 | zst)
-			    tar --checkpoint-action="ttyout=%T\r" -I zstd -xmpf "$tar_path" -C "$FILE_PATH"
+			    sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat "$tar_path" | tar --checkpoint-action="ttyout=%T\r" -I zstd -xmpf - -C "$FILE_PATH"
 		        ;;
 			tar)
-			    [[ ${MODDIR_NAME##*/} = Media ]] && tar --checkpoint-action="ttyout=%T\r" -axf "$tar_path" -C "$FILE_PATH" || tar --checkpoint-action="ttyout=%T\r" -amxf "$tar_path" -C "$FILE_PATH"
-			    ;;
+			    if [[ ${MODDIR_NAME##*/} = Media ]]; then
+					sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat "$tar_path" | tar --checkpoint-action="ttyout=%T\r" -axf - -C "$FILE_PATH"
+				else
+					sshpass -p "$sshPwd" ssh -p $sshPort $sshUser@$sshHost cat "$tar_path" | tar --checkpoint-action="ttyout=%T\r" -amxf - -C "$FILE_PATH"
+			    fi
+				;;
 			esac
 		else
 			Set_back
 		fi
-		echo_log "解壓縮${FILE_NAME##*.}"
+		echo_log "解压缩${FILE_NAME##*.}"
 		if [[ $result = 0 ]]; then
 			[[ -d $TMPPATH ]] && rm -rf "$TMPPATH/PATH"
 			case $FILE_NAME2 in
@@ -883,7 +887,7 @@ Release_data() {
 				;;
 			thanox)
 				restorecon -RF "$(find "/data/system" -name "thanos*" -maxdepth 1 -type d 2>/dev/null)/" 2>/dev/null
-				echo_log "selinux上下文設置" && echoRgb "警告 thanox配置恢復後務必重啟\n -否則不生效" "0"
+				echo_log "selinux上下文設置" && echoRgb "警告 thanox配置恢复後務必重啟\n -否則不生效" "0"
 				;;
 			storage-isolation)
 				restorecon -RF "/data/adb/storage-isolation/" 2>/dev/null
@@ -893,7 +897,7 @@ Release_data() {
 		fi
 		;;
 	*)
-		echoRgb "$FILE_NAME 壓縮包不支持解壓縮" "0"
+		echoRgb "$FILE_NAME 压缩包不支持解压缩" "0"
 		Set_back
 		;;
 	esac
@@ -907,18 +911,18 @@ installapk() {
 		lz4 | zst) tar --checkpoint-action="ttyout=%T\r" -I zstd -xmpf "$apkfile" -C "$TMPDIR" ;;
 		tar) tar --checkpoint-action="ttyout=%T\r" -xmpf "$apkfile" -C "$TMPDIR" ;;
 		*)
-			echoRgb "${apkfile##*/} 壓縮包不支持解壓縮" "0"
+			echoRgb "${apkfile##*/} 压缩包不支持解压缩" "0"
 			Set_back
 			;;
 		esac
-		echo_log "${apkfile##*/}解壓縮" && [[ -f $Backup_folder/nmsl.apk ]] && cp -r "$Backup_folder/nmsl.apk" "$TMPDIR"
+		echo_log "${apkfile##*/}解压缩" && [[ -f $Backup_folder/nmsl.apk ]] && cp -r "$Backup_folder/nmsl.apk" "$TMPDIR"
 	else
-		echoRgb "你的Apk壓縮包離家出走了，可能備份後移動過程丢失了\n -解決辦法手動安裝Apk後再執行恢復脚本" "0"
+		echoRgb "你的Apk压缩包離家出走了，可能备份後移動過程丢失了\n -解決辦法手動安裝Apk後再執行恢复脚本" "0"
 	fi
 	if [[ $result = 0 ]]; then
 		case $(find "$TMPDIR" -maxdepth 1 -name "*.apk" -type f 2>/dev/null | wc -l) in
 		1)
-			echoRgb "恢復普通apk" "2"
+			echoRgb "恢复普通apk" "2"
 			INSTALL "$TMPDIR"/*.apk
 			echo_log "Apk安裝"
 			;;
@@ -926,7 +930,7 @@ installapk() {
 			echoRgb "$TMPDIR中沒有apk" "0"
 			;;
 		*)
-			echoRgb "恢復split apk" "2"
+			echoRgb "恢复split apk" "2"
 			b="$(create 2>/dev/null | egrep -o '[0-9]+')"
 			if [[ -f $TMPDIR/nmsl.apk ]]; then
 				INSTALL "$TMPDIR/nmsl.apk"
@@ -962,7 +966,7 @@ get_name(){
 	txt="${txt/'/storage/emulated/'/'/data/media/'}"
 	if [[ $1 = Apkname ]]; then
 		rm -rf "$txt" "$txt2"
-		echoRgb "列出全部資料夾內應用名與自定義目录壓縮包名稱" "3"
+		echoRgb "列出全部文件夹內應用名与自定义目录压缩包名称" "3"
 	fi
 	rgb_a=118
 	find "$MODDIR" -maxdepth 2 -name "apk.*" -type f 2>/dev/null | sort | while read; do
@@ -970,19 +974,19 @@ get_name(){
 		[[ $rgb_a -ge 229 ]] && rgb_a=118
 		unset PackageName NAME DUMPAPK ChineseName
 		[[ -f $Folder/app_details ]] && . "$Folder/app_details" &>/dev/null
-		[[ ! -f $txt ]] && echo "#不需要恢復還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安" >"$txt"
+		[[ ! -f $txt ]] && echo "#不需要恢复還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安" >"$txt"
 		if [[ $PackageName = "" || $ChineseName = "" ]]; then
-			echoRgb "${Folder##*/}包名獲取失敗，解壓縮獲取包名中..." "0"
+			echoRgb "${Folder##*/}包名獲取失敗，解压缩獲取包名中..." "0"
 			rm -rf "$TMPDIR"/*
 			case ${REPLY##*.} in
 			lz4 | zst) tar -I zstd -xmpf "$REPLY" -C "$TMPDIR" --wildcards --no-anchored 'base.apk' ;;
 			tar) tar -xmpf "$REPLY" -C "$TMPDIR" --wildcards --no-anchored 'base.apk' ;;
 			*)
-			    echoRgb "${REPLY##*/} 壓縮包不支持解壓縮" "0"
+			    echoRgb "${REPLY##*/} 压缩包不支持解压缩" "0"
 				Set_back
 				;;
 			esac
-			echo_log "${REPLY##*/}解壓縮"
+			echo_log "${REPLY##*/}解压缩"
 			if [[ $result = 0 ]]; then
 				if [[ -f $TMPDIR/base.apk ]]; then
 					DUMPAPK="$(appinfo -sort-i -d " " -o ands,pn -f "$TMPDIR/base.apk")"
@@ -1012,8 +1016,8 @@ get_name(){
 		let rgb_a++
 	done
 	if [[ -d $MODDIR/Media ]]; then
-		echoRgb "存在媒體資料夾" "2"
-		[[ ! -f $txt2 ]] && echo "#不需要恢復的資料夾請在開頭注釋# 比如#媒體" > "$txt2"
+		echoRgb "存在媒體文件夹" "2"
+		[[ ! -f $txt2 ]] && echo "#不需要恢复的文件夹請在開頭注釋# 比如#媒體" > "$txt2"
 		find "$MODDIR/Media" -maxdepth 1 -name "*.tar*" -type f 2>/dev/null | while read; do
 			echoRgb "${REPLY##*/}" && echo "${REPLY##*/}" >> "$txt2"
 		done
@@ -1023,19 +1027,20 @@ get_name(){
 }
 self_test() {
 	if [[ $(dumpsys deviceidle get charging) = false && $(dumpsys battery | awk '/level/{print $2}' | egrep -o '[0-9]+') -le 20 ]]; then
-		echoRgb "電量$(dumpsys battery | awk '/level/{print $2}' | egrep -o '[0-9]+')%太低且未充電\n -為防止備份檔案或是恢復因低電量強制關機導致檔案損毀\n -請連接充電器後備份" "0" && exit 2
+		echoRgb "電量$(dumpsys battery | awk '/level/{print $2}' | egrep -o '[0-9]+')%太低且未充電\n -為防止备份檔案或是恢复因低電量強制關機導致檔案損毀\n -請連接充電器後备份" "0" && exit 2
 	fi
 }
 Validation_file() {
-	MODDIR_NAME="${1%/*}"
-	MODDIR_NAME="${MODDIR_NAME##*/}"
-	FILE_NAME="${1##*/}"
-	echoRgb "效驗$FILE_NAME"
-	case ${FILE_NAME##*.} in
-	lz4 | zst) zstd -t "$1" 2>/dev/null ;;
-	tar) tar -tf "$1" &>/dev/null ;;
-	esac
-	echo_log "效驗"
+	# TODO 在远程端校验文件
+	# MODDIR_NAME="${1%/*}"
+	# MODDIR_NAME="${MODDIR_NAME##*/}"
+	# FILE_NAME="${1##*/}"
+	# echoRgb "效驗$FILE_NAME"
+	# case ${FILE_NAME##*.} in
+	# lz4 | zst) zstd -t "$1" 2>/dev/null ;;
+	# tar) tar -tf "$1" &>/dev/null ;;
+	# esac
+	# echo_log "效驗"
 }
 Check_archive() {
 	starttime1="$(date -u "+%s")"
@@ -1046,7 +1051,7 @@ Check_archive() {
 	r="$(find "$MODDIR" -maxdepth 2 -name "app_details" -type f 2>/dev/null | wc -l)"
 	find "$MODDIR" -maxdepth 2 -name "app_details" -type f 2>/dev/null | sort | while read; do
 		REPLY="${REPLY%/*}"
-		echoRgb "效驗第$i/$r個資料夾 剩下$((r - i))個" "3"
+		echoRgb "效驗第$i/$r个文件夹 剩下$((r - i))个" "3"
 		echoRgb "效驗:${REPLY##*/}"
 		find "$REPLY" -maxdepth 1 -name "*.tar*" -type f 2>/dev/null | sort | while read; do
 			Validation_file "$REPLY"
@@ -1065,11 +1070,11 @@ backup)
 	self_test
 	[[ ! -d $script_path ]] && echo "$script_path脚本目录丢失" && exit 2
 	case $MODDIR in
-	/storage/emulated/0/Android/* | /data/media/0/Android/* | /sdcard/Android/*) echoRgb "請勿在$MODDIR內備份" "0" && exit 2 ;;
+	/storage/emulated/0/Android/* | /data/media/0/Android/* | /sdcard/Android/*) echoRgb "請勿在$MODDIR內备份" "0" && exit 2 ;;
 	esac
 	case $Compression_method in
 	zstd | Zstd | ZSTD | tar | Tar | TAR | lz4 | Lz4 | LZ4) ;;
-	*) echoRgb "$Compression_method為不支持的壓縮算法" "0" && exit 2 ;;
+	*) echoRgb "$Compression_method為不支持的压缩算法" "0" && exit 2 ;;
 	esac
 	#效驗選填是否正確
 	isBoolean "$Lo" "Lo" && Lo="$nsx"
@@ -1081,30 +1086,30 @@ backup)
 		isBoolean "$Backup_user_data" "Backup_user_data" && Backup_user_data="$nsx"
 		isBoolean "$backup_media" "backup_media" && backup_media="$nsx"
 	else
-		echoRgb "檢查目录是否存在已卸載應用?\n -音量上檢查，下不檢查"
-		get_version "檢查" "不檢查" && delete_folder="$branch"
-		echoRgb "檢查到已卸載應用\n -音量上刪除資料夾，下移動到其他處"
+		echoRgb "检查目录是否存在已卸載應用?\n -音量上检查，下不检查"
+		get_version "检查" "不检查" && delete_folder="$branch"
+		echoRgb "检查到已卸載應用\n -音量上刪除文件夹，下移動到其他處"
 		get_version "刪除" "移動到其他處" && default_behavior="$branch"
 		echoRgb "存在usb隨身碟是否默認使用隨身碟?\n -音量上默認，下進行詢問"
 		get_version "默認" "詢問" && USBdefault="$branch"
-		echoRgb "是否備份外部數據 即比如原神的數據包\n -音量上備份，音量下不備份" "2"
-		get_version "備份" "不備份" && Backup_obb_data="$branch"
-		echoRgb "是否備份使用者數據\n -音量上備份，音量下不備份" "2"
-		get_version "備份" "不備份" && Backup_user_data="$branch"
-		echoRgb "全部應用備份結束後是否備份自定義目录\n -音量上備份，音量下不備份" "2"
-		get_version "備份" "不備份" && backup_media="$branch"
+		echoRgb "是否备份外部数据 即比如原神的数据包\n -音量上备份，音量下不备份" "2"
+		get_version "备份" "不备份" && Backup_obb_data="$branch"
+		echoRgb "是否备份使用者数据\n -音量上备份，音量下不备份" "2"
+		get_version "备份" "不备份" && Backup_user_data="$branch"
+		echoRgb "全部應用备份結束後是否备份自定义目录\n -音量上备份，音量下不备份" "2"
+		get_version "备份" "不备份" && backup_media="$branch"
 	fi
 	i=1
-	#數據目录
+	#数据目录
 	txt="$MODDIR/appList.txt"
 	txt="${txt/'/storage/emulated/'/'/data/media/'}"
-	[[ ! -f $txt ]] && echoRgb "請執行\"生成應用列表.sh\"獲取應用列表再來備份" "0" && exit 1
+	[[ ! -f $txt ]] && echoRgb "請執行\"生成應用列表.sh\"獲取應用列表再來备份" "0" && exit 1
 	sort -u "$txt" -o "$txt" 2>/dev/null
 	data="$MODDIR"
 	hx="本地"
-	echoRgb "提示 脚本支持後台壓縮 可以直接離開脚本\n -或是關閉終端也能備份 如需停止脚本\n -請執行停止脚本.sh即可停止\n -備份結束將發送toast提示語" "3"
+	echoRgb "提示 脚本支持後台压缩 可以直接離開脚本\n -或是關閉終端也能备份 如需停止脚本\n -請執行停止脚本.sh即可停止\n -备份結束將發送toast提示語" "3"
 	backup_path
-	echoRgb "配置詳細:\n -壓縮方式:$Compression_method\n -音量鍵確認:$Lo\n -Toast:$toast_info\n -更新:$update\n -已卸載應用檢查:$delete_folder\n -卸載應用默認操作(true刪除false移動):$default_behavior\n -默認使用usb:$USBdefault\n -備份外部數據:$Backup_obb_data\n -備份user數據:$Backup_user_data\n -自定義目录備份:$backup_media"
+	echoRgb "配置詳細:\n -压缩方式:$Compression_method\n -音量鍵確認:$Lo\n -Toast:$toast_info\n -更新:$update\n -已卸載應用检查:$delete_folder\n -卸載應用默認操作(true刪除false移動):$default_behavior\n -默認使用usb:$USBdefault\n -备份外部数据:$Backup_obb_data\n -备份user数据:$Backup_user_data\n -自定义目录备份:$backup_media"
 	D="1"
 	C="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n '$=')"
 	if [[ $delete_folder = true ]]; then
@@ -1117,7 +1122,7 @@ backup)
 						if [[ $PackageName != "" && $(pm path --user "$user" "$PackageName" 2>/dev/null | cut -f2 -d ':') = "" ]]; then
 							if [[ $default_behavior = true ]]; then
 								rm -rf "$REPLY"
-								echoRgb "${REPLY##*/}不存在系統 刪除資料夾" "0"
+								echoRgb "${REPLY##*/}不存在系統 刪除文件夹" "0"
 							else
 								if [[ ! -d $Backup/被卸載的應用 ]]; then
 									mkdir -p "$Backup/被卸載的應用" && mv "$REPLY" "$Backup/被卸載的應用/"
@@ -1125,14 +1130,14 @@ backup)
 									mv "$REPLY" "$Backup/被卸載的應用/"
 								fi
 								[[ ! -d $Backup/被卸載的應用/tools ]] && cp -r "$tools_path" "$Backup/被卸載的應用" && rm -rf "$Backup/被卸載的應用/tools/bin/zip" "$Backup/被卸載的應用/tools/script"
-								[[ ! -f $Backup/被卸載的應用/恢復備份.sh ]] && cp -r "$script_path/restore" "$Backup/被卸載的應用/恢復備份.sh"
+								[[ ! -f $Backup/被卸載的應用/恢复备份.sh ]] && cp -r "$script_path/restore" "$Backup/被卸載的應用/恢复备份.sh"
 								[[ ! -f $Backup/被卸載的應用/重新生成應用列表.sh ]] && cp -r "$script_path/Get_DirName" "$Backup/被卸載的應用/重新生成應用列表.sh"
-								[[ ! -f $Backup/被卸載的應用/轉換資料夾名稱.sh ]] && cp -r "$script_path/convert" "$Backup/被卸載的應用/轉換資料夾名稱.sh"
-								[[ ! -f $Backup/被卸載的應用/壓縮檔完整性檢查.sh ]] && cp -r "$script_path/check_file" "$Backup/被卸載的應用/壓縮檔完整性檢查.sh"
+								[[ ! -f $Backup/被卸載的應用/转换文件夹名称.sh ]] && cp -r "$script_path/convert" "$Backup/被卸載的應用/转换文件夹名称.sh"
+								[[ ! -f $Backup/被卸載的應用/压缩包完整性检查.sh ]] && cp -r "$script_path/check_file" "$Backup/被卸載的應用/压缩包完整性检查.sh"
 								[[ ! -f $Backup/被卸載的應用/停止脚本.sh ]] && cp -r "$MODDIR/停止脚本.sh" "$Backup/被卸載的應用/停止脚本.sh"
-								[[ ! -f $Backup/被卸載的應用/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢復脚本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#備份與恢復遭遇異常或是結束後發送通知(toast與狀態欄提示)\ntoast_info=$toast_info\n\n#脚本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior\n#主色\nrgb_a=$rgb_a\n#輔色\nrgb_b=$rgb_b\nrgb_c=$rgb_c">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/被卸載的應用/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/被卸載的應用/backup_settings.conf"
+								[[ ! -f $Backup/被卸載的應用/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢复脚本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#备份与恢复遭遇異常或是結束後發送通知(toast与狀態欄提示)\ntoast_info=$toast_info\n\n#脚本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior\n#主色\nrgb_a=$rgb_a\n#輔色\nrgb_b=$rgb_b\nrgb_c=$rgb_c">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/被卸載的應用/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/被卸載的應用/backup_settings.conf"
 								txt2="$Backup/被卸載的應用/appList.txt"
-								[[ ! -f $txt2 ]] && echo "#不需要恢復還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安">"$txt2"
+								[[ ! -f $txt2 ]] && echo "#不需要恢复還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安">"$txt2"
 								echo "${REPLY##*/} $PackageName">>"$txt2"
 								echo "$(sed -e "s/${REPLY##*/} $PackageName//g ; /^$/d" "$Backup/appList.txt")" >"$Backup/appList.txt"
 								echoRgb "${REPLY##*/}不存在系統 已移動到$Backup/被卸載的應用" "0"
@@ -1144,7 +1149,7 @@ backup)
 		fi
 	fi
 	if [[ $1 = "" ]]; then
-		echoRgb "檢查備份列表中是否存在已經卸載應用" "3"
+		echoRgb "检查备份列表中是否存在已經卸載應用" "3"
 		while [[ $D -le $C ]]; do
 			name1="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n "${D}p" | awk '{print $1}')"
 			name2="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n "${D}p" | awk '{print $2}')"
@@ -1158,27 +1163,27 @@ backup)
 	fi
 	r="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n '$=')"
 	[[ $1 != "" ]] && r=1
-	[[ $r = "" ]] && echoRgb "$MODDIR_NAME/appList.txt是空的或是包名被注釋備份個鬼\n -檢查是否注釋亦或者執行$MODDIR_NAME/生成應用列表.sh" "0" && exit 1
-	[[ $Backup_user_data = false ]] && echoRgb "當前$MODDIR_NAME/backup_settings.conf的\n -Backup_user_data=0將不備份user數據" "0"
-	[[ $Backup_obb_data = false ]] && echoRgb "當前$MODDIR_NAME/backup_settings.conf的\n -Backup_obb_data=0將不備份外部數據" "0"
-	[[ $backup_media = false ]] && echoRgb "當前$MODDIR_NAME/backup_settings.conf的\n -backup_media=0將不備份自定義資料夾" "0"
+	[[ $r = "" ]] && echoRgb "$MODDIR_NAME/appList.txt是空的或是包名被注釋备份个鬼\n -检查是否注釋亦或者執行$MODDIR_NAME/生成應用列表.sh" "0" && exit 1
+	[[ $Backup_user_data = false ]] && echoRgb "當前$MODDIR_NAME/backup_settings.conf的\n -Backup_user_data=0將不备份user数据" "0"
+	[[ $Backup_obb_data = false ]] && echoRgb "當前$MODDIR_NAME/backup_settings.conf的\n -Backup_obb_data=0將不备份外部数据" "0"
+	[[ $backup_media = false ]] && echoRgb "當前$MODDIR_NAME/backup_settings.conf的\n -backup_media=0將不备份自定义文件夹" "0"
 	[[ ! -d $Backup ]] && mkdir -p "$Backup"
 	txt2="$Backup/appList.txt"
-	[[ ! -f $txt2 ]] && echo "#不需要恢復還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安">"$txt2"
+	[[ ! -f $txt2 ]] && echo "#不需要恢复還原的應用請在開頭注釋# 比如#xxxxxxxx 酷安">"$txt2"
 	[[ ! -d $Backup/tools ]] && cp -r "$tools_path" "$Backup" && rm -rf "$Backup/tools/bin/zip" "$Backup/tools/script"
-	[[ ! -f $Backup/恢復備份.sh ]] && cp -r "$script_path/restore" "$Backup/恢復備份.sh"
+	[[ ! -f $Backup/恢复备份.sh ]] && cp -r "$script_path/restore" "$Backup/恢复备份.sh"
 	[[ ! -f $Backup/停止脚本.sh ]] && cp -r "$MODDIR/停止脚本.sh" "$Backup/停止脚本.sh"
 	[[ ! -f $Backup/重新生成應用列表.sh ]] && cp -r "$script_path/Get_DirName" "$Backup/重新生成應用列表.sh"
-	[[ ! -f $Backup/轉換資料夾名稱.sh ]] && cp -r "$script_path/convert" "$Backup/轉換資料夾名稱.sh"
-	[[ ! -f $Backup/壓縮檔完整性檢查.sh ]] && cp -r "$script_path/check_file" "$Backup/壓縮檔完整性檢查.sh"
-	[[ -d $Backup/Media ]] && cp -r "$script_path/restore3" "$Backup/恢復自定義資料夾.sh"
-	[[ ! -f $Backup/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢復脚本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#備份與恢復遭遇異常或是結束後發送通知(toast與狀態欄提示)\ntoast_info=$toast_info\n\n#使用者\nuser=\n\n#脚本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior\n\n#恢復模式(1僅恢復未安裝應用0全恢復)\nrecovery_mode=0\n\n#主色\nrgb_a=$rgb_a\n#輔色\nrgb_b=$rgb_b\nrgb_c=$rgb_c">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/backup_settings.conf"
+	[[ ! -f $Backup/转换文件夹名称.sh ]] && cp -r "$script_path/convert" "$Backup/转换文件夹名称.sh"
+	[[ ! -f $Backup/压缩包完整性检查.sh ]] && cp -r "$script_path/check_file" "$Backup/压缩包完整性检查.sh"
+	[[ -d $Backup/Media ]] && cp -r "$script_path/restore3" "$Backup/恢复自定义文件夹.sh"
+	[[ ! -f $Backup/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢复脚本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#备份与恢复遭遇異常或是結束後發送通知(toast与狀態欄提示)\ntoast_info=$toast_info\n\n#使用者\nuser=\n\n#脚本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior\n\n#恢复模式(1僅恢复未安裝應用0全恢复)\nrecovery_mode=0\n\n#主色\nrgb_a=$rgb_a\n#輔色\nrgb_b=$rgb_b\nrgb_c=$rgb_c">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/backup_settings.conf"
 	filesha256="$(sha256sum "$bin_path/tools.sh" | cut -d" " -f1)"
 	filesha256_1="$(sha256sum "$Backup/tools/bin/tools.sh" | cut -d" " -f1)"
 	[[ $filesha256 != $filesha256_1 ]] && cp -r "$bin_path/tools.sh" "$Backup/tools/bin/tools.sh"
 	filesize="$(du -ks "$Backup" | awk '{print $1}')"
 	Quantity=0
-	#開始循環$txt內的資料進行備份
+	#開始循環$txt內的資料進行备份
 	#記錄開始時間
 	starttime1="$(date -u "+%s")"
 	TIME="$starttime1"
@@ -1206,16 +1211,16 @@ backup)
 		apk_path2="$(echo "$apk_path" | head -1)"
 		apk_path2="${apk_path2%/*}"
 		if [[ -d $apk_path2 ]]; then
-			echoRgb "備份第$i/$r個應用 剩下$((r - i))個" "3"
-			echoRgb "備份 $name1 \"$name2\"" "2"
+			echoRgb "备份第$i/$r个應用 剩下$((r - i))个" "3"
+			echoRgb "备份 $name1 \"$name2\"" "2"
 			unset Backup_folder ChineseName PackageName nobackup No_backupdata result apk_version versionName apk_version2 apk_version3 zsize Size data_path userSize dataSize obbSize
 			if [[ $name1 = !* || $name1 = ！* ]]; then
 				name1="$(echo "$name1" | sed 's/!//g ; s/！//g')"
-				echoRgb "跳過備份所有數據" "0"
+				echoRgb "跳過备份所有数据" "0"
 				No_backupdata=1
 			fi
 			if [[ $(echo "$blacklist" | grep -w "$name2") = $name2 ]]; then
-				echoRgb "黑名單應用跳過備份所有數據" "0"
+				echoRgb "黑名單應用跳過备份所有数据" "0"
 				No_backupdata=1
 			fi
 			Backup_folder="$Backup/$name1"
@@ -1229,31 +1234,31 @@ backup)
 					[[ -f $app_details ]] && . "$app_details" &>/dev/null
 				fi
 			fi
-			[[ $hx = USB && $PT = "" ]] && echoRgb "隨身碟意外斷開 請檢查穩定性" "0" && exit 1
+			[[ $hx = USB && $PT = "" ]] && echoRgb "隨身碟意外斷開 請检查穩定性" "0" && exit 1
 			starttime2="$(date -u "+%s")"
-			[[ $name2 = com.tencent.mobileqq ]] && echoRgb "QQ可能恢復備份失敗或是丟失聊天記錄，請自行用你信賴的應用備份" "0"
-			[[ $name2 = com.tencent.mm ]] && echoRgb "WX可能恢復備份失敗或是丟失聊天記錄，請自行用你信賴的應用備份" "0"
+			[[ $name2 = com.tencent.mobileqq ]] && echoRgb "QQ可能恢复备份失敗或是丟失聊天記錄，請自行用你信賴的應用备份" "0"
+			[[ $name2 = com.tencent.mm ]] && echoRgb "WX可能恢复备份失敗或是丟失聊天記錄，請自行用你信賴的應用备份" "0"
 			apk_number="$(echo "$apk_path" | wc -l)"
 		    [[ $name2 != $Open_apps2 ]] && pm suspend "$name2" 2>/dev/null | sed "s/Package $name2/ -應用:$name1/g ; s/new suspended state: true/暫停狀態:凍結/g"
 			if [[ $apk_number = 1 ]]; then
 				Backup_apk "非Split Apk" "3"
 			else
-				Backup_apk "Split Apk支持備份" "3"
+				Backup_apk "Split Apk支持备份" "3"
 			fi
 			if [[ $result = 0 && $No_backupdata = "" && $nobackup != true ]]; then
 				if [[ $Backup_obb_data = true ]]; then
-					#備份data數據
+					#备份data数据
 					Backup_data "data"
-					#備份obb數據
+					#备份obb数据
 					Backup_data "obb"
 				fi
-				#備份user數據
+				#备份user数据
 				[[ $Backup_user_data = true ]] && Backup_data "user"
 				[[ $name2 = github.tornaco.android.thanos ]] && Backup_data "thanox" "$(find "/data/system" -name "thanos*" -maxdepth 1 -type d 2>/dev/null)"
 				[[ $name2 = moe.shizuku.redirectstorage ]] && Backup_data "storage-isolation" "/data/adb/storage-isolation"
 			fi
             pm unsuspend "$name2" 2>/dev/null | sed "s/Package $name2/ -應用:$name1/g ; s/new suspended state: false/暫停狀態:解凍/g"
-			endtime 2 "$name1 備份" "3"
+			endtime 2 "$name1 备份" "3"
 			Occupation_status="$(df -h "${Backup%/*}" | sed -n 's|% /.*|%|p' | awk '{print $(NF-1),$(NF)}')"
 			lxj="$(echo "$Occupation_status" | awk '{print $3}' | sed 's/%//g')"
 			echoRgb "完成$((i * 100 / r))% $hx$(echo "$Occupation_status" | awk 'END{print "剩餘:"$1"使用率:"$2}')" "3"
@@ -1262,10 +1267,10 @@ backup)
 			echoRgb "_________________$(endtime 1 "已經")___________________"
 			rgb_a="$rgb_d"
 		else
-			echoRgb "$name1[$name2] 不在安裝列表，備份個寂寞？" "0"
+			echoRgb "$name1[$name2] 不在安裝列表，备份个寂寞？" "0"
 		fi
 		if [[ $i = $r ]]; then
-			endtime 1 "應用備份" "3"
+			endtime 1 "應用备份" "3"
 			appinfo -d " " -o pn -p | while read ; do
 			    pm unsuspend "$REPLY" | sed "s/Package $name2/ -應用:$name1/g ; s/new suspended state: false/暫停狀態:凍結/g"
 			done
@@ -1287,27 +1292,27 @@ backup)
 			fi
 			[[ $update_apk2 = "" ]] && update_apk2="暫无更新"
 			[[ $add_app2 = "" ]] && add_app2="暫无更新"
-			echoRgb "\n -已更新的apk=\"$osn\"\n -已新增的備份=\"$osk\"\n -apk版本號无變化=\"$osj\"\n -下列為版本號已變更的應用\n$update_apk2\n -新增的備份....\n$add_app2" "3"
+			echoRgb "\n -已更新的apk=\"$osn\"\n -已新增的备份=\"$osk\"\n -apk版本號无變化=\"$osj\"\n -下列為版本號已變更的應用\n$update_apk2\n -新增的备份....\n$add_app2" "3"
 			echo "$(sort "$txt2" | sed -e '/^$/d')" >"$txt2"
 			if [[ $backup_media = true ]]; then
 				A=1
 				B="$(echo "$Custom_path" | grep -v "#" | sed -e '/^$/d' | sed -n '$=')"
 				if [[ $B != "" ]]; then
-					echoRgb "備份結束，備份多媒體" "1"
+					echoRgb "备份結束，备份多媒體" "1"
 					starttime1="$(date -u "+%s")"
 					Backup_folder="$Backup/Media"
-					[[ ! -f $Backup/恢復自定義資料夾.sh ]] && cp -r "$script_path/restore3" "$Backup/恢復自定義資料夾.sh"
+					[[ ! -f $Backup/恢复自定义文件夹.sh ]] && cp -r "$script_path/restore3" "$Backup/恢复自定义文件夹.sh"
 					[[ ! -d $Backup_folder ]] && mkdir -p "$Backup_folder"
 					app_details="$Backup_folder/app_details"
 					[[ -f $app_details ]] && . "$app_details" &>/dev/null
 					mediatxt="$Backup/mediaList.txt"
-					[[ ! -f $mediatxt ]] && echo "#不需要恢復的資料夾請在開頭注釋# 比如#媒體" > "$mediatxt"
+					[[ ! -f $mediatxt ]] && echo "#不需要恢复的文件夹請在開頭注釋# 比如#媒體" > "$mediatxt"
 					echo "$Custom_path" | grep -v "#" | sed -e '/^$/d' | while read; do
-						echoRgb "備份第$A/$B個資料夾 剩下$((B - A))個" "3"
+						echoRgb "备份第$A/$B个文件夹 剩下$((B - A))个" "3"
 						starttime2="$(date -u "+%s")"
 						Backup_data "${REPLY##*/}" "$REPLY"
 						[[ $result = 0 ]] && [[ $(cat "$mediatxt" | grep -v "#" | sed -e '/^$/d' | grep -w "^${REPLY##*/}.tar$" | head -1) = "" ]] && echo "${REPLY##*/}.tar" >> "$mediatxt"
-						endtime 2 "${REPLY##*/}備份" "1"
+						endtime 2 "${REPLY##*/}备份" "1"
 						echoRgb "完成$((A * 100 / B))% $hx$(echo "$Occupation_status" | awk 'END{print "剩餘:"$1"使用率:"$2}')" "2"
 						rgb_d="$rgb_a"
 						rgb_a=188
@@ -1315,9 +1320,9 @@ backup)
 						rgb_a="$rgb_d" && let A++
 					done
 					echoRgb "目录↓↓↓\n -$Backup_folder"
-					endtime 1 "自定義備份"
+					endtime 1 "自定义备份"
 				else
-					echoRgb "自定義路徑為空 无法備份" "0"
+					echoRgb "自定义路徑為空 无法备份" "0"
 				fi
 			fi
 		fi
@@ -1325,11 +1330,11 @@ backup)
 	done
 	rm -rf "$TMPDIR/scriptTMP"
 	Calculate_size "$Backup"
-	echoRgb "批量備份完成"
+	echoRgb "批量备份完成"
 	starttime1="$TIME"
-	endtime 1 "批量備份開始到結束"
-	longToast "批量備份完成"
-	Print "批量備份完成 執行過程請查看$Status_log"
+	endtime 1 "批量备份開始到結束"
+	longToast "批量备份完成"
+	Print "批量备份完成 執行過程請查看$Status_log"
 	#打開應用
 	i=1
 	am_start="$(echo "$am_start" | head -n 4 | xargs | sed 's/ /\|/g')"
@@ -1359,22 +1364,22 @@ Restore)
 	kill_Serve
 	self_test
 	echoRgb "假設反悔了要停止脚本請儘速離開此脚本點擊$MODDIR_NAME/停止脚本.sh\n -否則脚本將繼續執行直到結束" "0"
-	echoRgb "如果大量提示找不到資料夾請執行$MODDIR_NAME/轉換資料夾名稱.sh"
+	echoRgb "如果大量提示找不到文件夹請執行$MODDIR_NAME/转换文件夹名称.sh"
 	disable_verify
 	[[ ! -d $path2 ]] && echoRgb "设备不存在user目录" "0" && exit 1
 	i=1
 	txt="$MODDIR/appList.txt"
-	[[ ! -f $txt ]] && echoRgb "請執行\"重新生成應用列表.sh\"獲取應用列表再來恢復" "0" && exit 2
+	[[ ! -f $txt ]] && echoRgb "請執行\"重新生成應用列表.sh\"獲取應用列表再來恢复" "0" && exit 2
 	sort -u "$txt" -o "$txt" 2>/dev/null
 	r="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n '$=')"
-	[[ $r = "" ]] && echoRgb "appList.txt包名為空或是被注釋了\n -請執行\"重新生成應用列表.sh\"獲取應用列表再來恢復" "0" && exit 1
+	[[ $r = "" ]] && echoRgb "appList.txt包名為空或是被注釋了\n -請執行\"重新生成應用列表.sh\"獲取應用列表再來恢复" "0" && exit 1
 	#效驗選填是否正確
 	isBoolean "$Lo" "Lo" && Lo="$nsx"
 	if [[ $Lo = false ]]; then
 		isBoolean "$recovery_mode" "recovery_mode" && recovery_mode="$nsx"
 	else
-		echoRgb "選擇應用恢復模式\n -音量上僅恢復未安裝，下全恢復"
-		get_version "恢復未安裝" "全恢復" && recovery_mode="$branch"
+		echoRgb "選擇應用恢复模式\n -音量上僅恢复未安裝，下全恢复"
+		get_version "恢复未安裝" "全恢复" && recovery_mode="$branch"
 	fi
 	if [[ $recovery_mode = true ]]; then
 		echoRgb "獲取未安裝應用中"
@@ -1391,10 +1396,10 @@ Restore)
 		sort -u "$TXT" -o "$TXT" 2>/dev/null
 		r="$(cat "$TXT" 2>/dev/null | grep -v "#" | sed -e '/^$/d' | sed -n '$=')"
 		if [[ $r != "" ]]; then
-			echoRgb "獲取完成 預計安裝$r個應用"
+			echoRgb "獲取完成 預計安裝$r个應用"
 			txt="$TXT"
 		else
-			echoRgb "獲取完成 但備份內應用都已安裝....正在退出脚本" "0" && exit 0
+			echoRgb "獲取完成 但备份內應用都已安裝....正在退出脚本" "0" && exit 0
 		fi
 	fi
 	[[ $(which restorecon) = "" ]] && echoRgb "restorecon命令不存在" "0" && exit 1
@@ -1407,13 +1412,13 @@ Restore)
 	{
 	while [[ $i -le $r ]]; do
 		[[ $en -ge 229 ]] && en=118
-		echoRgb "恢複第$i/$r個應用 剩下$((r - i))個" "3"
+		echoRgb "恢複第$i/$r个應用 剩下$((r - i))个" "3"
 		name1="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n "${i}p" | awk '{print $1}')"
 		name2="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n "${i}p" | awk '{print $2}')"
 		unset No_backupdata apk_version
 		if [[ $name1 = *! || $name1 = *！ ]]; then
 			name1="$(echo "$name1" | sed 's/!//g ; s/！//g')"
-			echoRgb "跳過恢復$name1 所有數據" "0"
+			echoRgb "跳過恢复$name1 所有数据" "0"
 			No_backupdata=1
 		fi
 		Backup_folder="$MODDIR/$name1"
@@ -1441,7 +1446,7 @@ Restore)
     					pm unsuspend "$name2" 2>/dev/null | sed "s/Package $name2/ -應用:$name1/g ; s/new suspended state: false/暫停狀態:解凍/g"
 				fi
 			else
-				[[ $No_backupdata = "" ]]&& echoRgb "$name1沒有安裝无法恢復數據" "0"
+				[[ $No_backupdata = "" ]]&& echoRgb "$name1沒有安裝无法恢复数据" "0"
 			fi
 			endtime 2 "$name1恢複" "2" && echoRgb "完成$((i * 100 / r))%" "3"
 			rgb_d="$rgb_a"
@@ -1449,17 +1454,17 @@ Restore)
 			echoRgb "_________________$(endtime 1 "已經")___________________"
 			rgb_a="$rgb_d"
 		else
-			echoRgb "$Backup_folder資料夾丢失，无法恢複" "0"
+			echoRgb "$Backup_folder文件夹丢失，无法恢複" "0"
 		fi
 		if [[ $i = $r ]]; then
             appinfo -d " " -o pn -p | while read ; do
 			    pm unsuspend "$REPLY" | sed "s/Package $name2/ -應用:$name1/g ; s/new suspended state: false/暫停狀態:解凍/g"
 			done
-			endtime 1 "應用恢復" "2"
+			endtime 1 "應用恢复" "2"
 			if [[ -d $Backup_folder2 ]]; then
-				Print "是否恢復多媒體數據 音量上恢復，音量下不恢復"
-				echoRgb "是否恢復多媒體數據\n -音量上恢復，音量下不恢復" "2"
-				get_version "恢復媒體數據" "跳過恢復媒體數據"
+				Print "是否恢复多媒體数据 音量上恢复，音量下不恢复"
+				echoRgb "是否恢复多媒體数据\n -音量上恢复，音量下不恢复" "2"
+				get_version "恢复媒體数据" "跳過恢复媒體数据"
 				starttime1="$(date -u "+%s")"
 				app_details="$Backup_folder2/app_details"
 				A=1
@@ -1467,11 +1472,11 @@ Restore)
 				if [[ $branch = true ]]; then
 					find "$Backup_folder2" -maxdepth 1 -name "*.tar*" -type f 2>/dev/null | while read; do
 						starttime2="$(date -u "+%s")"
-						echoRgb "恢復第$A/$B個壓縮包 剩下$((B - A))個" "3"
+						echoRgb "恢复第$A/$B个压缩包 剩下$((B - A))个" "3"
 						Release_data "$REPLY"
 						endtime 2 "$FILE_NAME2恢複" "2" && echoRgb "完成$((A * 100 / B))%" "3" && echoRgb "____________________________________" && let A++
 					done
-					endtime 1 "自定義恢復" "2"
+					endtime 1 "自定义恢复" "2"
 				fi
 			fi
 		fi
@@ -1480,8 +1485,8 @@ Restore)
 	rm -rf "$TMPDIR/scriptTMP" "$TXT"
 	starttime1="$TIME"
 	echoRgb "批量恢複完成" && endtime 1 "批量恢複開始到結束" && echoRgb "如發現應用閃退請重新開機"
-	longToast "批量恢復完成"
-	Print "批量恢復完成 執行過程請查看$Status_log" && rm -rf "$TMPDIR"/*
+	longToast "批量恢复完成"
+	Print "批量恢复完成 執行過程請查看$Status_log" && rm -rf "$TMPDIR"/*
 	} &
 	wait && exit
 	;;
@@ -1528,7 +1533,7 @@ Restore2)
 		done
         pm unsuspend "$name2" 2>/dev/null | sed "s/Package $name2/ -應用:$name1/g ; s/new suspended state: false/暫停狀態:解凍/g"
 	else
-		echoRgb "$name1沒有安裝无法恢復數據" "0"
+		echoRgb "$name1沒有安裝无法恢复数据" "0"
 	fi
 	endtime 1 "恢複開始到結束" && echoRgb "如發現應用閃退請重新開機" && rm -rf "$TMPDIR"/*
 	rm -rf "$TMPDIR/scriptTMP"
@@ -1537,15 +1542,15 @@ Restore2)
 Restore3)
 	kill_Serve
 	self_test
-	echoRgb "點錯了?這是恢復自定義資料夾脚本 如果你是要恢復應用那你就點錯了\n -音量上繼續恢復自定義資料夾，音量下離開脚本" "2"
+	echoRgb "點錯了?這是恢复自定义文件夹脚本 如果你是要恢复應用那你就點錯了\n -音量上繼續恢复自定义文件夹，音量下離開脚本" "2"
 	echoRgb "假設反悔了要停止脚本請儘速離開此脚本點擊停止脚本.sh,否則脚本將繼續執行直到結束" "0"
-	get_version "恢復自定義資料夾" "離開脚本" && [[ "$branch" = false ]] && exit 0
+	get_version "恢复自定义文件夹" "離開脚本" && [[ "$branch" = false ]] && exit 0
 	mediaDir="$MODDIR/Media"
 	[[ -f "$mediaDir/app_details" ]] && app_details="$mediaDir/app_details" &>/dev/null
 	Backup_folder2="$mediaDir"
-	[[ ! -d $mediaDir ]] && echoRgb "媒體資料夾不存在" "0" && exit 2
+	[[ ! -d $mediaDir ]] && echoRgb "媒體文件夹不存在" "0" && exit 2
 	txt="$MODDIR/mediaList.txt"
-	[[ ! -f $txt ]] && echoRgb "請執行\"重新生成應用列表.sh\"獲取媒體列表再來恢復" "0" && exit 2
+	[[ ! -f $txt ]] && echoRgb "請執行\"重新生成應用列表.sh\"獲取媒體列表再來恢复" "0" && exit 2
 	sort -u "$txt" -o "$txt" 2>/dev/null
 	#記錄開始時間
 	starttime1="$(date -u "+%s")"
@@ -1559,13 +1564,13 @@ Restore3)
 	starttime1="$(date -u "+%s")"
 	A=1
 	B="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n '$=')"
-	[[ $B = "" ]] && echoRgb "mediaList.txt壓縮包名為空或是被注釋了\n -請執行\"重新生成應用列表.sh\"獲取列表再來恢復" "0" && exit 1
+	[[ $B = "" ]] && echoRgb "mediaList.txt压缩包名為空或是被注釋了\n -請執行\"重新生成應用列表.sh\"獲取列表再來恢复" "0" && exit 1
 	echo "$script">"$TMPDIR/scriptTMP"
 	{
 	while [[ $A -le $B ]]; do
 		name1="$(cat "$txt" | grep -v "#" | sed -e '/^$/d' | sed -n "${A}p" | awk '{print $1}')"
 		starttime2="$(date -u "+%s")"
-		echoRgb "恢復第$A/$B個壓縮包 剩下$((B - A))個" "3"
+		echoRgb "恢复第$A/$B个压缩包 剩下$((B - A))个" "3"
 		Release_data "$mediaDir/$name1"
 		endtime 2 "$FILE_NAME2恢複" "2" && echoRgb "完成$((A * 100 / B))%" "3" && echoRgb "____________________________________" && let A++
 	done
@@ -1583,12 +1588,12 @@ Getlist)
 	txtpath="$MODDIR"
 	[[ $debug_list = true ]] && txtpath="${txtpath/'/storage/emulated/'/'/data/media/'}"
 	nametxt="$txtpath/appList.txt"
-	[[ ! -e $nametxt ]] && echo '#不需要備份的應用請在開頭注釋# 比如#酷安 xxxxxxxx\n#不需要備份數據比如!酷安 xxxxxxxx應用名前方方加一個驚嘆號即可 注意是應用名不是包名' >"$nametxt"
+	[[ ! -e $nametxt ]] && echo '#不需要备份的應用請在開頭注釋# 比如#酷安 xxxxxxxx\n#不需要备份数据比如!酷安 xxxxxxxx應用名前方方加一个驚嘆號即可 注意是應用名不是包名' >"$nametxt"
 	echoRgb "請勿關閉脚本，等待提示結束"
 	rgb_a=118
 	rm -rf "$MODDIR/tmp"
 	starttime1="$(date -u "+%s")"
-	echoRgb "提示!因為系統自帶app(位於data分區或是可卸載預裝應用)備份恢復可能存在問題\n -所以不會輸出..但是檢測為Xposed類型包名將輸出\n -如果提示不是Xposed但他就是Xposed可能為此應用元數據不符合規範導致" "0"
+	echoRgb "提示!因為系統自帶app(位於data分區或是可卸載預裝應用)备份恢复可能存在問題\n -所以不會輸出..但是檢測為Xposed類型包名將輸出\n -如果提示不是Xposed但他就是Xposed可能為此應用元数据不符合規範導致" "0"
 	xposed_name="$(appinfo -o pn -xm)"
 	[[ $user = 0 ]] && Apk_info="$(appinfo -sort-i -d " " -o ands,pn -pn $system -3 2>/dev/null | egrep -v 'ice.message|com.topjohnwu.magisk' | sort -u)" || Apk_info="$(appinfo -sort-i -d " " -o ands,pn -pn $system $(pm list packages -3 --user "$user" | cut -f2 -d ':') 2>/dev/null | egrep -v 'ice.message|com.topjohnwu.magisk' | sort -u)"
 	[[ $Apk_info = "" ]] && echoRgb "appinfo輸出失敗" "0" && exit 2
@@ -1671,34 +1676,34 @@ backup_media)
 		starttime1="$(date -u "+%s")"
 		Backup_folder="$Backup/Media"
 		[[ ! -d $Backup_folder ]] && mkdir -p "$Backup_folder"
-		[[ ! -f $Backup/恢復自定義資料夾.sh ]] && cp -r "$script_path/restore3" "$Backup/恢復自定義資料夾.sh"
+		[[ ! -f $Backup/恢复自定义文件夹.sh ]] && cp -r "$script_path/restore3" "$Backup/恢复自定义文件夹.sh"
 		[[ ! -f $Backup/重新生成應用列表.sh ]] && cp -r "$script_path/Get_DirName" "$Backup/重新生成應用列表.sh"
-		[[ ! -f $Backup/轉換資料夾名稱.sh ]] && cp -r "$script_path/convert" "$Backup/轉換資料夾名稱.sh"
-		[[ ! -f $Backup/壓縮檔完整性檢查.sh ]] && cp -r "$script_path/check_file" "$Backup/壓縮檔完整性檢查.sh"
+		[[ ! -f $Backup/转换文件夹名称.sh ]] && cp -r "$script_path/convert" "$Backup/转换文件夹名称.sh"
+		[[ ! -f $Backup/压缩包完整性检查.sh ]] && cp -r "$script_path/check_file" "$Backup/压缩包完整性检查.sh"
 		[[ ! -d $Backup/tools ]] && cp -r "$tools_path" "$Backup" && rm -rf "$Backup/tools/bin/zip" "$Backup/tools/script"
-		[[ ! -f $Backup/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢復脚本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#備份與恢復遭遇異常或是結束後發送通知(toast與狀態欄提示)\ntoast_info=$toast_info\n\n#脚本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/backup_settings.conf"
+		[[ ! -f $Backup/backup_settings.conf ]] && echo "#1開啟0關閉\n\n#是否在每次執行恢复脚本時使用音量鍵詢問如下需求\n#如果是那下面兩項項設置就被忽略，改為音量鍵選擇\nLo=$Lo\n\n#备份与恢复遭遇異常或是結束後發送通知(toast与狀態欄提示)\ntoast_info=$toast_info\n\n#脚本檢測更新後進行更新?\nupdate=$update\n\n#檢測到更新後的行為(1跳轉瀏覽器 0不跳轉瀏覽器，但是複製連結到剪裁版)\nupdate_behavior=$update_behavior">"$Backup/backup_settings.conf" && echo "$(sed 's/true/1/g ; s/false/0/g' "$Backup/backup_settings.conf")">"$Backup/backup_settings.conf"
 		app_details="$Backup_folder/app_details"
 		filesize="$(du -ks "$Backup_folder" | awk '{print $1}')"
 		[[ -f $app_details ]] && . "$app_details" &>/dev/null || touch "$app_details"
 		mediatxt="$Backup/mediaList.txt"
-		[[ ! -f $mediatxt ]] && echo "#不需要恢復的資料夾請在開頭注釋# 比如#媒體" > "$mediatxt"
+		[[ ! -f $mediatxt ]] && echo "#不需要恢复的文件夹請在開頭注釋# 比如#媒體" > "$mediatxt"
 		echo "$script">"$TMPDIR/scriptTMP"
 		{
 		echo "$Custom_path" | grep -v "#" | sed -e '/^$/d' | while read; do
-			echoRgb "備份第$A/$B個資料夾 剩下$((B - A))個" "3"
+			echoRgb "备份第$A/$B个文件夹 剩下$((B - A))个" "3"
 			starttime2="$(date -u "+%s")" 
 			[[ ${REPLY: -1} = / ]] && REPLY="${REPLY%?}"
 			Backup_data "${REPLY##*/}" "$REPLY"
 			[[ $result = 0 ]] && [[ $(cat "$mediatxt" | grep -v "#" | sed -e '/^$/d' | grep -w "^${REPLY##*/}.tar$" | head -1) = "" ]] && echo "${REPLY##*/}.tar" >> "$mediatxt"
-			endtime 2 "${REPLY##*/}備份" "1"
+			endtime 2 "${REPLY##*/}备份" "1"
 			echoRgb "完成$((A * 100 / B))% $hx$(echo "$Occupation_status" | awk 'END{print "剩餘:"$1"使用率:"$2}')" "2" && echoRgb "____________________________________" && let A++
 		done
 		Calculate_size "$Backup_folder"
-		endtime 1 "自定義備份"
+		endtime 1 "自定义备份"
 		rm -rf "$TMPDIR/scriptTMP"
 		} &
 	else
-		echoRgb "自定義路徑為空 无法備份" "0"
+		echoRgb "自定义路徑為空 无法备份" "0"
 	fi
 	;;
 esac
